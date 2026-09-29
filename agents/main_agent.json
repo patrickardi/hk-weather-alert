@@ -1,0 +1,7 @@
+{
+  "agent_name" : "main_agent",
+  "version" : "1.0.0",
+  "role" : "HK Emergency Weather Alert Assistant",
+  "temperature":0.1,
+  "whitelisted_sources_only":true
+}
