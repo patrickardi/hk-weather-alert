@@ -313,7 +313,9 @@ design decision that requires a conversation, not a commit — which is what
 `test_provenance_enum_has_not_grown_silently` exists to force.
 
 ```text
+
    The Three-Stage Principle
+
      Situational Input             Rule Engine                  Output
   ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
   │ Fuzzy allowed       │ →  │ Fully deterministic │ →  │ Finite set          │
