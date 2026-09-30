@@ -84,13 +84,13 @@ of water. The card must never print the words "typhoon shelter" as advice.
 - `extra="allow"` in wire, `extra="forbid"` in domain. Right direction.
 - `warningMessage: list[str] | Literal[""]` and `uvindex: UvIndexObject | Literal[""]`
   encode the fact that `""` means *no data*, not zero.
-- `ActiveWarning` carries both `warning_key` and `code` (live data has
-  `key=WFIRE`, `code=WFIREY`).
+- `ActiveWarning` carries both `warning_key` and `code` (live data has `key=WFIRE`, `code=WFIREY`).
 - `looks_like_json()` checks content-type **and** first byte — catches
   HTTP 200 with an HTML body.
 - `stale_as_of` uses `min()`. The card prints the **oldest** source time.
-- `Provenance` has exactly two members and **neither of them is
-  "generated"**. Keep it that way. See §7.
+- `test_golden_cases` matches the abstained reason.
+- `Provenance` has exactly two members and **neither of them is "generated"**.
+  Keep it that way. See §7.
 
 ### Blocking, in order
 
@@ -297,23 +297,22 @@ The only available check is agreement between two sources. Needs a golden case.
 ## 7. Where GenAI is allowed
 
 ✅ Turning what a user says out loud into a `PersonalContext`.
-   **Not sure → leave the field `None`. Never guess.**
+   **Not sure → leave the field `None`. Never guess or fabricate.**
 ✅ Selecting relevant sentences from a whitelisted source document,
    **verbatim, no rewriting.**
 
 ❌ Fetching data from the Internet
 ❌ Deciding whether a warning is in force
-❌ Resolving a district or an address
+❌ Resolving a district or address
 ❌ Filling a missing value
 ❌ Writing safety copy
-❌ Translating
+❌ Translating directly
 
 `Provenance` has two members and neither is "generated". Adding a third is a
 design decision that requires a conversation, not a commit — which is what
 `test_provenance_enum_has_not_grown_silently` exists to force.
 
 ```text
-
    The Three-Stage Principle
 
      Situational Input             Rule Engine                  Output
@@ -342,7 +341,7 @@ Fix in this order:
 2. Add `test_evaluate_rejects_raw_dicts`.
 3. Delete every `isinstance(..., dict)` branch. Anything that breaks was relying on the gap.
 
-### 8.2 A test that cannot fail is worse than no test
+### 8.2 A test that cannot fail is worse than NULL
 
 Two currently cannot fail:
 
@@ -350,7 +349,7 @@ Two currently cannot fail:
   `Provenance` enum. Tautology.
 - `if not source:` — `source` is a pydantic model. Models have no
   `__bool__`, so they are always truthy. Meanwhile `RuleSource.url` defaults
-  to `""`, so a `safety_critical` rule with no URL passes every test and
+  to `""`, so a `safety_critical` rule with no URL passes every test point and
   raises at runtime instead.
 
 ### 8.3 Monotonic is not enough
@@ -358,7 +357,7 @@ Two currently cannot fail:
 `assert black >= red >= yellow` passes when all three are equal 
 — including the exact bug it was written to catch. Add `assert black > yellow`.
 
-### 8.4 One concern per test
+### 8.4 One concern
 
 `test_rain_severity_*` is about rainstorm ordering. It does not need the
 fish-market address. Give it a clean address and keep the 101 Wu Shan Road
@@ -382,7 +381,7 @@ This is the only real defence against paraphrase drift (what `retrieved_on` is f
 - [ ] `housing=None` → card states it did not consider housing
 - [ ] Card copy contains the phrase "typhoon shelter" → fail
 
-### 8.7 Move coverage assertions out of the parametrised test
+### 8.7 Move coverage assertions out of the parametrised method
 
 `REQUIRED_IDS.issubset(...)` and `len(CASES) >= 6` currently run once per case, and never run at all if `cases:` is empty.
 
@@ -413,6 +412,6 @@ All quotes in this repo carry `retrieved_on`. The sources currently cited:
 | HKO Open Data API Documentation | 2026-09-28 (samples labelled NOT real data) |
 
 Reference event for all scenario work: **Typhoon Wipha, Sunday 20 July 2025.**
-T8 00:20 → T9 07:20 → T10 09:20 (≈7 hours) → T8 16:10 → T3 19:40. Red
-rainstorm warning 15:10–18:10. About 214 people went to government shelters.
+T8 00:20 → T9 07:20 → T10 09:20 (≈7 hours) → T8 16:10 → T3 19:40. Red rainstorm warning 15:10–18:10.
+About 214 people went to government shelters.
 It was a Sunday (the rest day).
