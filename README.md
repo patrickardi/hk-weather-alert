@@ -312,6 +312,17 @@ The only available check is agreement between two sources. Needs a golden case.
 design decision that requires a conversation, not a commit — which is what
 `test_provenance_enum_has_not_grown_silently` exists to force.
 
+```text
+   The Three-Stage Principle
+     Situational Input             Rule Engine                  Output
+  ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+  │ Fuzzy allowed       │ →  │ Fully deterministic │ →  │ Finite set          │
+  │ Typos allowed       │    │ YAML rules          │    │ Pre-rendered PNG    │
+  │ Voice allowed       │    │ Zero LLM            │    │ Pre-rendered MP3    │
+  └─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+      fuzzy front door            ↑ auditable               ↑ reproducible
+```
+
 ---
 
 ## 8. Test rules
@@ -320,16 +331,14 @@ design decision that requires a conversation, not a commit — which is what
 
 The suite currently accepts either dicts or models throughout
 (`result["abstained"] if isinstance(result, dict) else result.abstained`).
-That is why the `schemas.py` validators are not protecting anything: there is
-always a path around them.
+That is why the `schemas.py` validators are not protecting anything: there is always a path around them.
 
 Fix in this order:
 1. `tests/helpers.run_evaluate` validates its dict arguments into
    `PersonalContext` / `WeatherState` and returns a `RiskResponse`.
    YAML fixtures stay as dicts; that is fine.
 2. Add `test_evaluate_rejects_raw_dicts`.
-3. Delete every `isinstance(..., dict)` branch. Anything that breaks was
-   relying on the gap.
+3. Delete every `isinstance(..., dict)` branch. Anything that breaks was relying on the gap.
 
 ### 8.2 A test that cannot fail is worse than no test
 
@@ -356,8 +365,8 @@ fixture for the block-suppression test.
 ### 8.5 Quotes must exist in their sources
 
 For every rule with `provenance == quote_only`, assert `rule.source.quote` is
-a substring of a stored local snapshot of the source page. This is the only
-real defence against paraphrase drift, and it is what `retrieved_on` is for.
+a substring of a stored local snapshot of the source page.
+This is the only real defence against paraphrase drift (what `retrieved_on` is for).
 
 ### 8.6 Golden cases still missing
 
