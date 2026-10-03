@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.3.0",
+  "lang": "en",
+  "state": {
+    "fetched_at": "2026-05-21T15:07:42+08:00",
+    "source_updated_at": {
+      "rhrread": "2026-05-21T15:02:00+08:00",
+      "warnsum": "2026-05-21T11:00:00+08:00",
+      "warningInfo": "2026-05-21T11:00:00+08:00"
+    }
+  },
+  "headline": {
+    "code": "HKO_WRAINR_MEANING",
+    "severity": "warning",
+    "provenance": "quote_only",
+    "safety_critical": false,
+    "text": "Heavy rain has fallen or is expected to fall generally over Hong Kong, exceeding 50 millimetres in an hour, and is likely to continue.",
+    "source_url": "https://www.hko.gov.hk/en/wservice/warning/rainstor.htm",
+    "source_label": "Hong Kong Observatory",
+    "reviewed_by": "TODO-your-name"
+  },
+  "advice": [
+    {
+      "code": "HKO_WRAIN_RB_WATERCOURSES",
+      "severity": "danger",
+      "provenance": "quote_only",
+      "safety_critical": true,
+      "text": "People should avoid going near easily flooded watercourses or passing through flooded areas.",
+      "source_url": "https://www.hko.gov.hk/en/wservice/warning/rainstor.htm",
+      "source_label": "Hong Kong Observatory",
+      "reviewed_by": "TODO-your-name"
+    },
+    {
+      "code": "HKO_WRAINR_OUTDOOR_WORK",
+      "severity": "warning",
+      "provenance": "quote_only",
+      "safety_critical": true,
+      "text": "Employees working outdoors in areas exposed to rain should suspend outdoor duties if weather conditions in those areas so warrant.",
+      "source_url": "https://www.hko.gov.hk/en/wservice/warning/rainstor.htm",
+      "source_label": "Hong Kong Observatory",
+      "reviewed_by": "TODO-your-name"
+    },
+    {
+      "code": "HKO_WRAINR_TRAVEL",
+      "severity": "caution",
+      "provenance": "quote_only",
+      "safety_critical": true,
+      "text": "People who have to travel should carefully consider weather and road conditions.",
+      "source_url": "https://www.hko.gov.hk/en/wservice/warning/rainstor.htm",
+      "source_label": "Hong Kong Observatory",
+      "reviewed_by": "TODO-your-name"
+    },
+    {
+      "code": "OWN_CHECK_ORG_ARRANGEMENTS",
+      "severity": "advisory",
+      "provenance": "template",
+      "safety_critical": false,
+      "text": "Arrangements differ between schools and employers. Check yours before setting out.",
+      "source_url": "https://www.hko.gov.hk/en/wservice/warning/rainstor.htm",
+      "source_label": "Our wording, based on: Hong Kong Observatory",
+      "reviewed_by": "TODO-native-speaker-name"
+    }
+  ],
+  "abstentions": [
+    {
+      "field": "nearest_shelter",
+      "reason": "We could not verify the address of the nearest temporary shelter against an official list, so we are not showing one.",
+      "fallback_url": "https://www.had.gov.hk/",
+      "fallback_label": "Home Affairs Department"
+    }
+  ]
+}
