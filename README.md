@@ -144,6 +144,7 @@ of water. The card must never print the words "typhoon shelter" as advice.
 | **Hot Weather Special Advisory** | HKO | web / broadcast, *below* Very Hot Weather Warning threshold | 🔴 **No** |
 | Shelter opening status | Home Affairs Department | had.gov.hk + GIA | 🔴 No |
 | Daytime-only refuge halls (a **second, different** list) | HAD | `List_CH_CC_Day_E.pdf` | 🔴 No |
+| Bahasa Indonesia / Tagalog version of any of the above | — | 🔴 Not published |
 
 On 29 Sep 2026 the GIA page carried, on the same day, nine Labour Department
 notifications about one Heat Stress at Work Warning **and** a separate HKO
