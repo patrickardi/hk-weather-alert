@@ -1,0 +1,97 @@
+{
+  "schema_version": "0.1",
+  "card_id": "wushan_red_rain_partial",
+  "_note": "示範文字，非即時天氣資訊，非官方引述 / Sample wording, not live data, not an official quotation.",
+
+  "severity": "warning",
+  "abstained": false,
+  "abstain_reason": null,
+
+  "location": {
+    "query": "101 Wu Shan Road",
+    "resolved": null,
+    "confidence": 0.41,
+    "label_zh": "香港",
+    "label_en": "HONG KONG"
+  },
+
+  "headline": {
+    "zh": "香港持續有雨。",
+    "en": "Rain persists in Hong Kong."
+  },
+
+  "stale_as_of": "2025-07-20T11:00:00+08:00",
+  "stale_as_of_display": "Information as of 11:00 HKT",
+
+  "blocks": [
+    {
+      "id": "ACTIVE_WARNINGS",
+      "rendered": true,
+      "title_zh": "建議行動",
+      "title_en": "WHAT TO DO",
+      "items": [
+        { "icon": "home",   "zh": "留在室內。",   "en": "Stay indoors." },
+        { "icon": "no",     "zh": "遠離積水。",   "en": "Keep away from floodwater." },
+        { "icon": "info",   "zh": "留意官方消息。", "en": "Check official updates." }
+      ]
+    },
+    {
+      "id": "LOCAL_OBSERVATION",
+      "rendered": true,
+      "title_zh": "本區觀測",
+      "title_en": "LOCAL OBSERVATION",
+      "items": [
+        { "zh": "過去一小時雨量超過 50 毫米。", "en": "Over 50 mm of rain in the past hour." }
+      ]
+    },
+    {
+      "id": "SHELTER",
+      "rendered": false,
+      "reason_zh": "我們無法確認你的地址，因此不顯示庇護中心資訊。",
+      "reason_en": "We cannot confirm your address, so shelter information is not shown.",
+      "where_to_ask": { "label_zh": "請致電 2572 8427 查詢。", "label_en": "Call 2572 8427.", "tel": "25728427" }
+    },
+    {
+      "id": "HOUSING_RISK",
+      "rendered": false,
+      "reason_zh": "未能確認你的住所類型，因此不顯示住屋風險。",
+      "reason_en": "We cannot confirm your housing type, so housing risk is not shown.",
+      "where_to_ask": { "label_zh": "請致電 2572 8427 查詢。", "label_en": "Call 2572 8427.", "tel": "25728427" }
+    },
+    {
+      "id": "WORK",
+      "rendered": true,
+      "title_zh": "上班安排",
+      "title_en": "WORK",
+      "items": [
+        { "zh": "紅雨期間，僱主應參考勞工處指引。", "en": "During Red Rain, employers should follow Labour Department guidance." }
+      ]
+    },
+    {
+      "id": "CONTACT",
+      "rendered": true,
+      "position": "top",
+      "emphasis": "large"
+    }
+  ],
+
+  "contact": {
+    "emergency": { "label": "999", "tel": "999" },
+    "sms_emergency": { "label_zh": "992（短訊 / 傳真）", "label_en": "992 (SMS / fax)", "tel": "992" },
+    "where_to_ask": { "label_zh": "民政事務總署熱線 2572 8427", "label_en": "HAD hotline 2572 8427", "tel": "25728427" }
+  },
+
+  "not_considered": [],
+
+  "sources": [
+    {
+      "name_zh": "香港天文台",
+      "name_en": "Hong Kong Observatory",
+      "url": "https://www.hko.gov.hk",
+      "link_label_zh": "官方網站",
+      "link_label_en": "Official website",
+      "as_of": "2025-07-20T11:00:00+08:00",
+      "verbatim": false
+    }
+  ]
+}
