@@ -1,0 +1,280 @@
+cases:
+  - id: domestic_helper_black_rain_pets
+    description: 外佣 + 黑雨 + 有宠物
+    personal:
+      request_address: "101 Wu Shan Road"
+      district: "屯門"
+      latitude: 22.37693
+      longitude: 113.96868
+      northing: 826429.0
+      easting: 814827.0
+      building_name_zh: "青山魚類批發市場"
+      building_name_en: "CASTLE PEAK WHOLESALE FISH MARKET"
+      geocode_score: 88.75
+      is_domestic_helper: true
+      has_pets: true
+      housing: standard
+      has_bedridden: false
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      icon_codes: [53]
+      icon_update_time: "2026-09-25T15:02:00+08:00"
+      warning_messages:
+        - "黑色暴雨警告現正生效。"
+      rainfall_start_time: "2026-09-25T13:45:00+08:00"
+      rainfall_end_time: "2026-09-25T14:45:00+08:00"
+      rainfall:
+        - {place: "屯門", max_mm: 70, is_main: false}
+      temperatures:
+        - {place: "屯門", value_c: 28}
+      temperature_record_time: "2026-09-25T15:00:00+08:00"
+      humidity:
+        place: "香港天文台"
+        value_percent: 90
+        record_time: "2026-09-25T15:00:00+08:00"
+      uv_index:
+        place: "京士柏"
+        value: 1
+        desc: "低"
+        record_desc: "過去一小時"
+      warnings:
+        WRAINB:
+          warning_key: WRAINB
+          code: WRAINB
+          name: Black Rainstorm Warning
+          warning_type: Black
+          action_code: ISSUE
+          issue_time: "2026-09-25T14:00:00+08:00"
+          update_time: "2026-09-25T14:00:00+08:00"
+    expect:
+      abstained: false
+      min_advice: 1
+      any_safety_critical: true
+      fired_rules_contains:
+        - helper_black_rain
+        - pets_black_rain
+
+  - id: rooftop_landslip
+    description: 天台屋 + 山泥倾泻警告
+    personal:
+      request_address: "101 Wu Shan Road"
+      district: "屯門"
+      latitude: 22.37693
+      longitude: 113.96868
+      northing: 826429.0
+      easting: 814827.0
+      building_name_zh: "青山魚類批發市場"
+      building_name_en: "CASTLE PEAK WHOLESALE FISH MARKET"
+      geocode_score: 88.75
+      is_domestic_helper: false
+      has_pets: false
+      housing: rooftop
+      has_bedridden: false
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      icon_codes: [64]
+      icon_update_time: "2026-09-25T15:02:00+08:00"
+      warning_messages:
+        - "山泥傾瀉警告現正生效。"
+      rainfall_start_time: "2026-09-25T13:45:00+08:00"
+      rainfall_end_time: "2026-09-25T14:45:00+08:00"
+      rainfall:
+        - {place: "屯門", max_mm: 40, is_main: false}
+      temperatures:
+        - {place: "屯門", value_c: 27}
+      temperature_record_time: "2026-09-25T15:00:00+08:00"
+      humidity:
+        place: "香港天文台"
+        value_percent: 88
+        record_time: "2026-09-25T15:00:00+08:00"
+      uv_index:
+        place: "京士柏"
+        value: 2
+        desc: "低"
+        record_desc: "過去一小時"
+      warnings:
+        WL:
+          warning_key: WL
+          code: WL
+          name: Landslip Warning
+          warning_type: null
+          action_code: ISSUE
+          issue_time: "2026-09-25T13:00:00+08:00"
+          update_time: "2026-09-25T13:00:00+08:00"
+    expect:
+      abstained: false
+      min_advice: 1
+      any_safety_critical: true
+      fired_rules_contains:
+        - rooftop_landslip
+
+  - id: bedridden_black_rain
+    description: 家中有卧床者 + 黑雨
+    personal:
+      request_address: "101 Wu Shan Road"
+      district: "屯門"
+      latitude: 22.37693
+      longitude: 113.96868
+      northing: 826429.0
+      easting: 814827.0
+      building_name_zh: "青山魚類批發市場"
+      building_name_en: "CASTLE PEAK WHOLESALE FISH MARKET"
+      geocode_score: 88.75
+      is_domestic_helper: false
+      has_pets: false
+      housing: standard
+      has_bedridden: true
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      icon_codes: [53]
+      icon_update_time: "2026-09-25T15:02:00+08:00"
+      warning_messages:
+        - "黑色暴雨警告現正生效。"
+      rainfall_start_time: "2026-09-25T13:45:00+08:00"
+      rainfall_end_time: "2026-09-25T14:45:00+08:00"
+      rainfall:
+        - {place: "屯門", max_mm: 70, is_main: false}
+      temperatures:
+        - {place: "屯門", value_c: 28}
+      temperature_record_time: "2026-09-25T15:00:00+08:00"
+      humidity:
+        place: "香港天文台"
+        value_percent: 90
+        record_time: "2026-09-25T15:00:00+08:00"
+      uv_index:
+        place: "京士柏"
+        value: 1
+        desc: "低"
+        record_desc: "過去一小時"
+      warnings:
+        WRAINB:
+          warning_key: WRAINB
+          code: WRAINB
+          name: Black Rainstorm Warning
+          warning_type: Black
+          action_code: ISSUE
+          issue_time: "2026-09-25T14:00:00+08:00"
+          update_time: "2026-09-25T14:00:00+08:00"
+    expect:
+      abstained: false
+      min_advice: 1
+      any_safety_critical: true
+      fired_rules_contains:
+        - bedridden_black_rain
+
+  - id: no_active_warning_normal_card
+    description: 无警报生效 → 正常卡片，不弃答
+    personal:
+      request_address: "101 Wu Shan Road"
+      district: "屯門"
+      latitude: 22.37693
+      longitude: 113.96868
+      northing: 826429.0
+      easting: 814827.0
+      building_name_zh: "青山魚類批發市場"
+      building_name_en: "CASTLE PEAK WHOLESALE FISH MARKET"
+      geocode_score: 88.75
+      is_domestic_helper: false
+      has_pets: false
+      housing: standard
+      has_bedridden: false
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      icon_codes: [51]
+      icon_update_time: "2026-09-25T11:20:00+08:00"
+      warning_messages: []
+      rainfall_start_time: "2026-09-25T13:45:00+08:00"
+      rainfall_end_time: "2026-09-25T14:45:00+08:00"
+      rainfall:
+        - {place: "屯門", max_mm: 0, is_main: false}
+      temperatures:
+        - {place: "屯門", value_c: 31}
+      temperature_record_time: "2026-09-25T15:00:00+08:00"
+      humidity:
+        place: "香港天文台"
+        value_percent: 58
+        record_time: "2026-09-25T15:00:00+08:00"
+      uv_index:
+        place: "京士柏"
+        value: 5
+        desc: "中等"
+        record_desc: "過去一小時"
+      warnings: {}
+    expect:
+      abstained: false
+      min_advice: 1
+      fired_rules_contains:
+        - no_active_warning_status
+
+  - id: out_of_scope_must_abstain
+    description: 区域在研究范围外 → 必须弃答且提示范围
+    personal:
+      request_address: "1 Futian Road"
+      district: "福田"
+      latitude: 22.5431
+      longitude: 114.0579
+      northing: 0.0
+      easting: 0.0
+      geocode_score: 40.0
+      is_domestic_helper: false
+      has_pets: false
+      housing: standard
+      has_bedridden: false
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      icon_codes: [53]
+      icon_update_time: "2026-09-25T15:02:00+08:00"
+      warning_messages:
+        - "黑色暴雨警告現正生效。"
+      rainfall_start_time: "2026-09-25T13:45:00+08:00"
+      rainfall_end_time: "2026-09-25T14:45:00+08:00"
+      rainfall: []
+      temperatures: []
+      temperature_record_time: "2026-09-25T15:00:00+08:00"
+      humidity:
+        place: "香港天文台"
+        value_percent: 90
+        record_time: "2026-09-25T15:00:00+08:00"
+      uv_index:
+        place: "京士柏"
+        value: 1
+        desc: "低"
+        record_desc: "過去一小時"
+      warnings:
+        WRAINB:
+          warning_key: WRAINB
+          code: WRAINB
+          name: Black Rainstorm Warning
+          warning_type: Black
+          action_code: ISSUE
+          issue_time: "2026-09-25T14:00:00+08:00"
+          update_time: "2026-09-25T14:00:00+08:00"
+    expect:
+      abstained: true
+      abstain_reason_contains: "范围"
+      min_advice: 0
+      fired_rules_contains:
+        - abstain_out_of_scope
+
+  - id: incomplete_data_must_abstain
+    description: 数据不完整 → 必须弃答
+    personal:
+      request_address: "101 Wu Shan Road"
+      district: "屯門"
+      is_domestic_helper: false
+      has_pets: false
+      housing: standard
+      has_bedridden: false
+    weather:
+      warnings:
+        WRAINB:
+          warning_key: WRAINB
+          code: WRAINB
+          name: Black Rainstorm Warning
+          action_code: ISSUE
+    expect:
+      abstained: true
+      abstain_reason_contains: "不完整"
+      min_advice: 0
+      fired_rules_contains:
+        - abstain_incomplete_data

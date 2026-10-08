@@ -1,0 +1,99 @@
+rules:
+  - id: helper_black_rain
+    safety_critical: true
+    tier: quote_only
+    severity: danger
+    title: 黑色暴雨 · 外佣留在室内
+    body: 黑色暴雨警告生效时，应留在安全的室内，不要外出。如必须处理家务以外的紧急情况，先确保自身安全。
+    source:
+      quote: 黑色暴雨警告生效时，市民应留在安全的室内，避免外出及进入淹水地区。
+      url: https://www.hko.gov.hk/tc/wservice/warning/rainstor.htm
+      label: 香港天文台
+
+  - id: pets_black_rain
+    safety_critical: true
+    tier: quote_only
+    severity: danger
+    title: 黑色暴雨 · 看管宠物
+    body: 把宠物留在室内高处，不要放它们外出。不要为了接宠物而进入淹水或交通中断的地方。
+    source:
+      quote: 黑色暴雨警告生效时，市民应留在安全的室内，避免外出及进入淹水地区。
+      url: https://www.hko.gov.hk/tc/wservice/warning/rainstor.htm
+      label: 香港天文台
+
+  - id: rooftop_landslip
+    safety_critical: true
+    tier: quote_only
+    severity: danger
+    title: 山泥倾泻 · 天台屋
+    body: 山泥倾泻警告生效时，斜坡附近及天台屋住户应远离危险斜坡，听从撤离指示。
+    source:
+      quote: 山泥倾泻警告生效时，市民应远离斜坡，留意政府的撤离安排。
+      url: https://www.hko.gov.hk/tc/wservice/warning/landslip.htm
+      label: 香港天文台
+
+  - id: bedridden_black_rain
+    safety_critical: true
+    tier: quote_only
+    severity: danger
+    title: 黑色暴雨 · 家中有卧床者
+    body: 不要独自搬运卧床者涉水外出。先留在现时最安全的室内位置，需要协助时致电 999。
+    source:
+      quote: 黑色暴雨警告生效时，市民应留在安全的室内。如需紧急救援，请致电 999。
+      url: https://www.hko.gov.hk/tc/wservice/warning/rainstor.htm
+      label: 香港天文台
+
+  - id: rainstorm_level
+    safety_critical: true
+    tier: quote_only
+    severity: caution
+    title: 暴雨警告
+    body: 请留意最新暴雨警告，减少非必要外出。
+    source:
+      quote: 市民应留意最新的暴雨警告，采取适当防御措施。
+      url: https://www.hko.gov.hk/tc/wservice/warning/rainstor.htm
+      label: 香港天文台
+
+  - id: no_active_warning_status
+    safety_critical: false
+    tier: template
+    severity: advisory
+    title: 目前没有生效的天气警告
+    body: 目前没有生效的天气警告。请继续留意天文台更新。
+    source:
+      quote: 现时并无生效的天气警告。
+      url: https://www.hko.gov.hk/tc/warnsum/intro.htm
+      label: 香港天文台
+
+  - id: emergency_999
+    safety_critical: true
+    tier: quote_only
+    severity: danger
+    title: 紧急求助
+    body: 如遇紧急情况，请致电 999。
+    source:
+      quote: 如遇紧急情况，请致电 999。
+      url: https://www.police.gov.hk/ppp_tc/contact_us.html
+      label: 香港警务处
+
+  - id: abstain_out_of_scope
+    safety_critical: false
+    tier: template
+    severity: advisory
+    title: 超出研究范围
+    body: 该地址不在本卡覆盖的香港十八区范围内。
+    source:
+      quote: 本服务覆盖香港十八区。
+      url: https://www.had.gov.hk/
+      label: 民政事务总署
+
+  - id: abstain_incomplete_data
+    safety_critical: false
+    tier: template
+    severity: advisory
+    title: 数据不完整
+    body: 输入或上游天气数据不完整，不足以判断你所在位置的情况。
+    source:
+      quote: 数据不完整时不应给出情境化行动建议。
+      url: https://www.hko.gov.hk/
+      label: 香港天文台

@@ -1,9 +1,10 @@
-from schemas import EmergencyShelter, ActionOutput, CitationFootnote
-from datetime import datetime
-import zoneinfo
+"""HKO / ALS wire models: exact JSON mirror. No domain, no coercion."""
+
 from __future__ import annotations
+
 import json
 from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, RootModel
 
 WIRE_CONFIG = ConfigDict(extra="allow", frozen=True)
@@ -93,21 +94,20 @@ class RequestAddress(WireModel):
 
 
 class EngStreet(WireModel):
-    LocationName: str | None = None
-    StreetName: str | None = None
-    BuildingNoFrom: str | None = None
-    BuildingNoTo: str | None = None
+    LocationName: str
+    StreetName: str
+    BuildingNoFrom: str
 
 
 class EngDistrict(WireModel):
-    DcDistrict: str | None = None
+    DcDistrict: str
 
 
 class EngPremisesAddress(WireModel):
-    BuildingName: str | None = None
-    EngStreet: EngStreet | None = None
-    EngDistrict: EngDistrict | None = None
-    Region: str | None = None
+    BuildingName: str
+    EngStreet: EngStreet
+    EngDistrict: EngDistrict
+    Region: str
 
 
 class ChiStreet(WireModel):
@@ -192,24 +192,3 @@ def parse_rhrread(payload: dict) -> RhrreadDocument:
 
 def parse_als(payload: dict) -> AlsDocument:
     return AlsDocument.model_validate(payload)
-
-
-def verify_shelter(data:dict) -> EmergencyShelter:
-    """validate raw shelter data w/ pydantic schema in schema.py before processing (llm)"""
-    return EmergencyShelter(**data)
-
-
-def generate_card(status:str , actions:dict, citations:list) -> ActionOutput:
-    """format output for pipeline  (image generation)"""
-
-    hk=zoneinfo.ZoneInfo("Asia/Hong_Kong")
-    hkt=datetime.now(hk)
-    current_time=hkt.strftime("%Y-%m-%d %H:%M HKT")
-
-    return ActionOutput(
-        timestamp=current_time,
-        user_status=status,
-        do_actions=actions.get("do",[]),
-        dont_actions=actions.get("dont",[]),
-        citation_footnotes=citations
-    )

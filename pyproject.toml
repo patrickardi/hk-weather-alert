@@ -1,0 +1,23 @@
+[project]
+name = "hk-weather-risk-card"
+version = "0.1.0"
+description = "Hackathon: personal weather-risk card from HKO + ALS, rules-first."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+]
+render = [
+    "playwright>=1.40",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = ["-v"]
