@@ -1,0 +1,93 @@
+{\rtf1\ansi\ansicpg936\cocoartf2868
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 - id: S_BLACK_RAIN_BASE\
+  when: \{ warning_in_force: [WRAINB] \}\
+  then:\
+    advice_ids: [ADV_BLACK_RAIN_QUOTE]\
+    severity: 5\
+    safety_critical: true\
+    tier: quote_only          # \uc0\u8592  \u21482 \u24341 \u29992 \u23448 \u26041 \u21407 \u25991 \u65292 \u19981 \u29983 \u25104 \
+  source: \{ ref: W_RAIN_BLACK \}\
+\
+- id: S_ROOFTOP_SQUATTER_LANDSLIP\
+  when:\
+    all:\
+      - dwelling_in: [rooftop_structure, squatter]\
+      - any:\
+          - warning_in_force: [WL]\
+          - warning_in_force: [WRAINB]\
+  then:\
+    advice_ids: [ADV_ROOFTOP_VULNERABLE, ADV_SHELTER_LOOKUP]\
+    severity: 5\
+    safety_critical: true\
+    tier: template\
+\
+- id: S_LOW_FLOOR_TONG_LAU\
+  when:\
+    all:\
+      - dwelling_in: [tong_lau, subdivided_flat]\
+      - floor_lte: 2\
+      - warning_in_force: [WRAINR, WRAINB]\
+  then:\
+    advice_ids: [ADV_LOW_FLOOR_WATER_INGRESS, ADV_POWER_SAFETY]\
+    severity: 4\
+    safety_critical: true\
+    tier: template\
+\
+- id: S_BEDBOUND_HOUSEHOLD\
+  when:\
+    all:\
+      - mobility_any: [bedbound, needs_assistance]\
+      - warning_in_force: [WRAINB, WL, WTCSGNL]\
+  then:\
+    advice_ids: [ADV_PLAN_EARLY_ASSISTANCE, ADV_CALL_HOTLINE_NOW]\
+    severity: 5\
+    safety_critical: true\
+    tier: template\
+    note: >\
+      \uc0\u19981 \u21578 \u35785 \u29992 \u25143 \u12300 \u33258 \u24049 \u25644 \u12301 \u12290 \u32473 \u20986 \u21487 \u27714 \u21161 \u30340 \u20855 \u20307 \u28192 \u36947 \u12290 \
+      \uc0\u27492 \u22788 \u19981 \u24471 \u30001  LLM \u29983 \u25104 \u25644 \u36816 \u26041 \u27861 \u12290 \
+\
+- id: S_PETS_BLOCKER\
+  when:\
+    all:\
+      - has_pets: true\
+      - warning_in_force: [WRAINB, WTCSGNL]\
+  then:\
+    advice_ids: [ADV_PETS_UNKNOWN_POLICY]\
+    severity: 3\
+    safety_critical: false\
+    tier: template\
+    note: >\
+      \uc0\u23456 \u29289 \u25919 \u31574 \u22312 \u23448 \u26041 \u21517 \u21333 \u20013 \u23436 \u20840 \u32570 \u22833 \u65288 \u35265  DATA_GAP_TABLE\u65289 \
+      \uc0\u22240 \u27492 \u26412 \u26465 \u21482 \u33021 \u35828 \u26126 \u12300 \u25919 \u31574 \u26410 \u20844 \u24320 \u65292 \u24314 \u35758 \u20808 \u33268 \u30005 \u30830 \u35748 \u12301 \u65292 \u19981 \u24471 \u32534 \u36896 \u12290 \
+\
+- id: S_DOMESTIC_HELPER_EMPLOYER_REQUEST\
+  when:\
+    all:\
+      - occupation_in: [domestic_helper]\
+      - warning_in_force: [WRAINB, WTCSGNL]\
+  then:\
+    advice_ids: [ADV_HELPER_RIGHTS_QUOTE]\
+    severity: 4\
+    safety_critical: true\
+    tier: quote_only          # \uc0\u8592  \u27861 \u24459 \u38382 \u39064 \u65306 \u21482 \u24341 \u29992 \u65292 \u32477 \u19981 \u29983 \u25104 \
+  source:\
+    label: "TODO \uc0\u9888 \u65039  \u24453 \u34917 \'94\
+    url: "TODO: \uc0\u21171 \u24037 \u22788 \u12298 \u21488 \u39118 \u21450 \u26292 \u38632 \u35686 \u21578 \u19979 \u24037 \u20316 \u23432 \u21017 \u12299 \u23448 \u26041 \u39029 \u38754 "\
+    quote: "TODO: \uc0\u36880 \u23383 \u24341 \u29992 \u30456 \u20851 \u27573 \u33853 "\
+    note: >\
+      \uc0\u9888 \u65039  \u35831 \u30830 \u35748 \u21171 \u24037 \u22788 \u35813 \u23432 \u21017 \u23545 \u22806 \u31821 \u23478 \u24237 \u20323 \u24037 \u30340 \u20855 \u20307 \u36866 \u29992 \u26465 \u25991 \
+      \uc0\u24517 \u39035 \u20808 \u25214 \u21040 \u23448 \u26041 \u21407 \u25991 \u24182 \u36880 \u23383 \u24341 \u29992 \u12290 \u25214 \u19981 \u21040 \u26126 \u30830 \u26465 \u25991  \u8594  \u25913 \u20026  abstain + \u21171 \u24037 \u22788 \u28909 \u32447 \u12290 \
+	## \uc0\u39033 \u30446 \u25512 \u36827 \u36807 \u31243 \u20013 \u65292 \u25552 \u37266 \u25105 \u34917 \u23436 \
+\
+- id: S_FALLBACK_ABSTAIN\
+  when: \{ not: \{ any: [ \{warning_in_force: [WRAINA, WRAINR, WRAINB, WL, WTCSGNL, WHOT]\} ] \} \}\
+  then:\
+    abstain: true\
+    abstain_reason: "\uc0\u30446 \u21069 \u27809 \u26377 \u30456 \u20851 \u35686 \u25253 \u29983 \u25928 "}
