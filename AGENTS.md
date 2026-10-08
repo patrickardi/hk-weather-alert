@@ -121,7 +121,7 @@ abstain-never-blank validator. Still genuinely absent: any `Rule` or
 - Warning identity is `code`, not warnsum dict key.
 - `lang=id` returns HTTP 200 + text/html. Abstain. Do not claim the Observatory refuses minorities.
 
-## `agents/`
+## `Agents/`
 
 `prompt.yaml` (system prompt), `main_agent.json` (temperature 0.1,
 `whitelisted_sources_only: true`), and `fixtures/`. README never mentions
