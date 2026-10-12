@@ -1,3 +1,5 @@
+from datetime import date
+
 from app.schemas import (
     AdviceItem,
     CardBlock,
@@ -6,6 +8,8 @@ from app.schemas import (
     RiskResponse,
     Severity,
 )
+
+_RETRIEVED = date(2026, 9, 28)
 
 _RAIN = AdviceItem(
     code="rainstorm_level",
@@ -17,6 +21,7 @@ _RAIN = AdviceItem(
     source_url="https://www.hko.gov.hk/tc/wservice/warning/rainstor.htm",
     source_label="香港天文台",
     quote="市民应留意最新的暴雨警告，采取适当防御措施。",
+    retrieved_on=_RETRIEVED,
 )
 
 _EMERGENCY = AdviceItem(
@@ -29,6 +34,7 @@ _EMERGENCY = AdviceItem(
     source_url="https://www.police.gov.hk/ppp_tc/contact_us.html",
     source_label="香港警务处",
     quote="如遇紧急情况，请致电 999。",
+    retrieved_on=_RETRIEVED,
 )
 
 SAMPLES = {

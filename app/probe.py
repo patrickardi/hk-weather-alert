@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 from urllib.error import URLError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +14,12 @@ HKO_WARNSUM = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataT
 HKO_RHRREAD = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc"
 HKO_ID = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=id"
 ALS = "https://www.als.gov.hk/lookup?q=101%20Wu%20Shan%20Road&n=5"
+
+ALS_SHAPES = {
+    "village": "23 Luk Tei Tong, Mui Wo",
+    "estate": "Long Ping Estate, Yuen Long",
+    "nonexistent": "zzz-no-such-address-hk-99999",
+}
 
 
 def _get(url: str, headers: dict[str, str] | None = None) -> tuple[int, str, str]:
@@ -49,8 +57,26 @@ def run() -> dict:
     return report
 
 
+def run_als_shapes() -> dict:
+    out = FIXTURES / "als_shapes"
+    out.mkdir(exist_ok=True)
+    report: dict = {}
+    for name, query in ALS_SHAPES.items():
+        url = f"https://www.als.gov.hk/lookup?q={quote(query)}&n=5"
+        status, ctype, text = _get(url, headers={"Accept": "application/json"})
+        (out / f"{name}.json").write_text(text, encoding="utf-8")
+        report[name] = {"status": status, "content_type": ctype, "query": query}
+    return report
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--als", action="store_true", help="probe village / estate / nonexistent ALS shapes")
+    args = parser.parse_args()
     try:
-        print(json.dumps(run(), ensure_ascii=False, indent=2))
+        if args.als:
+            print(json.dumps(run_als_shapes(), ensure_ascii=False, indent=2))
+        else:
+            print(json.dumps(run(), ensure_ascii=False, indent=2))
     except URLError as exc:
         raise SystemExit(f"probe failed: {exc}") from exc

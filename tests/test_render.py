@@ -8,3 +8,9 @@ def test_sample_card_has_status_contact_and_blocks():
     assert "999" in html
     assert "DONT" in html
     assert "uv_index" in html
+
+
+def test_hotline_does_not_repeat_number():
+    html = render_html(SAMPLES["wushan_red_rain_partial"])
+    assert "999 999" not in html
+    assert "请致电 999" in html

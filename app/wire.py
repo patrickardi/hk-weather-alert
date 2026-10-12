@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 WIRE_CONFIG = ConfigDict(extra="allow", frozen=True)
 
@@ -30,8 +30,8 @@ class WarnsumDocument(RootModel[dict[str, WarnsumWarningItem]]):
 class RainfallRow(WireModel):
     unit: str
     place: str
-    max: int
-    main: Literal["FALSE", ""]
+    max: int | float | str
+    main: str
 
 
 class RainfallBlock(WireModel):
@@ -76,69 +76,82 @@ class UvIndexObject(WireModel):
 class RhrreadDocument(WireModel):
     rainfall: RainfallBlock
     warningMessage: list[str] | Literal[""]
-    icon: list[int]
-    iconUpdateTime: str
-    uvindex: UvIndexObject | Literal[""]
+    icon: list[int] = Field(default_factory=list)
+    iconUpdateTime: str | None = None
+    uvindex: UvIndexObject | Literal[""] = ""
     updateTime: str
     temperature: TemperatureBlock
-    tcmessage: str
-    mintempFrom00To09: str
-    rainfallFrom00To12: str
-    rainfallLastMonth: str
-    rainfallJanuaryToLastMonth: str
-    humidity: HumidityBlock
+    tcmessage: str | None = None
+    mintempFrom00To09: str | None = None
+    rainfallFrom00To12: str | None = None
+    rainfallLastMonth: str | None = None
+    rainfallJanuaryToLastMonth: str | None = None
+    humidity: HumidityBlock | None = None
 
 
 class RequestAddress(WireModel):
-    AddressLine: list[str]
+    AddressLine: list[str] = Field(default_factory=list)
 
 
 class EngStreet(WireModel):
-    LocationName: str
-    StreetName: str
-    BuildingNoFrom: str
+    LocationName: str | None = None
+    StreetName: str | None = None
+    BuildingNoFrom: str | None = None
 
 
 class EngDistrict(WireModel):
-    DcDistrict: str
+    DcDistrict: str | None = None
+
+
+_EngStreetAlias = EngStreet
+_EngDistrictAlias = EngDistrict
 
 
 class EngPremisesAddress(WireModel):
-    BuildingName: str
-    EngStreet: EngStreet
-    EngDistrict: EngDistrict
-    Region: str
+    BuildingName: str | None = None
+    EngStreet: _EngStreetAlias | None = None
+    EngDistrict: _EngDistrictAlias | None = None
+    Region: str | None = None
 
 
 class ChiStreet(WireModel):
-    LocationName: str
-    StreetName: str
-    BuildingNoFrom: str
+    LocationName: str | None = None
+    StreetName: str | None = None
+    BuildingNoFrom: str | None = None
 
 
 class ChiDistrict(WireModel):
-    DcDistrict: str
+    DcDistrict: str | None = None
+
+
+_ChiStreetAlias = ChiStreet
+_ChiDistrictAlias = ChiDistrict
 
 
 class ChiPremisesAddress(WireModel):
-    Region: str
-    ChiDistrict: ChiDistrict
-    ChiStreet: ChiStreet
-    BuildingName: str
+    Region: str | None = None
+    ChiDistrict: _ChiDistrictAlias | None = None
+    ChiStreet: _ChiStreetAlias | None = None
+    BuildingName: str | None = None
 
 
 class GeospatialInformation(WireModel):
-    Northing: str
-    Easting: str
-    Latitude: str
-    Longitude: str
+    Northing: str | None = None
+    Easting: str | None = None
+    Latitude: str | None = None
+    Longitude: str | None = None
+
+
+_EngPremisesAddressAlias = EngPremisesAddress
+_ChiPremisesAddressAlias = ChiPremisesAddress
+_GeospatialInformationAlias = GeospatialInformation
 
 
 class PremisesAddress(WireModel):
-    EngPremisesAddress: EngPremisesAddress
-    ChiPremisesAddress: ChiPremisesAddress
-    GeoAddress: str
-    GeospatialInformation: GeospatialInformation
+    EngPremisesAddress: _EngPremisesAddressAlias | None = None
+    ChiPremisesAddress: _ChiPremisesAddressAlias | None = None
+    GeoAddress: str | None = None
+    GeospatialInformation: _GeospatialInformationAlias | None = None
 
 
 class AlsAddress(WireModel):
@@ -146,17 +159,24 @@ class AlsAddress(WireModel):
 
 
 class ValidationInformation(WireModel):
-    Score: float
+    Score: float | None = None
+
+
+_ValidationInformationAlias = ValidationInformation
 
 
 class SuggestedAddress(WireModel):
     Address: AlsAddress
-    ValidationInformation: ValidationInformation
+    ValidationInformation: _ValidationInformationAlias | None = None
+
+
+_RequestAddressAlias = RequestAddress
+_SuggestedAddressAlias = SuggestedAddress
 
 
 class AlsDocument(WireModel):
-    RequestAddress: RequestAddress
-    SuggestedAddress: list[SuggestedAddress]
+    RequestAddress: _RequestAddressAlias
+    SuggestedAddress: list[_SuggestedAddressAlias] = Field(default_factory=list)
 
 
 class UpstreamNotJson(ValueError):
