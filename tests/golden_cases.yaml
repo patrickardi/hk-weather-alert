@@ -278,3 +278,68 @@ cases:
       min_advice: 0
       fired_rules_contains:
         - abstain_incomplete_data
+
+  - id: housing_none_states_not_considered
+    description: housing 未询问 → 卡片声明未纳入住屋
+    personal:
+      request_address: "1 Tuen Mun Heung Sze Wui Road"
+      district: "屯門"
+      latitude: 22.39
+      longitude: 113.97
+      geocode_score: 70.0
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      warnings: {}
+    expect:
+      abstained: false
+      not_considered_contains:
+        - housing
+      fired_rules_contains:
+        - no_active_warning_status
+
+  - id: very_hot_contact_until_midnight
+    description: 仅酷热天气警告 → CONTACT 午夜前
+    personal:
+      request_address: "1 Tuen Mun Heung Sze Wui Road"
+      district: "屯門"
+      latitude: 22.39
+      longitude: 113.97
+      geocode_score: 70.0
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      warnings:
+        WHOT:
+          warning_key: WHOT
+          code: WHOT
+          name: Very Hot Weather Warning
+          action_code: ISSUE
+          issue_time: "2026-09-25T14:00:00+08:00"
+          update_time: "2026-09-25T14:00:00+08:00"
+    expect:
+      abstained: false
+      contact_hours_contains: "午夜"
+      contact_mode: had_until_midnight
+
+  - id: t8_contact_round_the_clock
+    description: T8 → CONTACT 全日
+    personal:
+      request_address: "1 Tuen Mun Heung Sze Wui Road"
+      district: "屯門"
+      latitude: 22.39
+      longitude: 113.97
+      geocode_score: 70.0
+    weather:
+      observed_at: "2026-09-25T15:02:00+08:00"
+      warnings:
+        WTCSGNL:
+          warning_key: WTCSGNL
+          code: WTCSGNL
+          name: Tropical Cyclone Warning Signal
+          warning_type: TC8NE
+          action_code: ISSUE
+          issue_time: "2026-09-25T00:20:00+08:00"
+          update_time: "2026-09-25T00:20:00+08:00"
+    expect:
+      abstained: false
+      contact_hours_contains: "24小时"
+      contact_mode: had_round_the_clock

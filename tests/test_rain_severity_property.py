@@ -1,11 +1,6 @@
 from copy import deepcopy
 
-TIER_RANK = {
-    "advisory": 1,
-    "caution": 2,
-    "warning": 3,
-    "danger": 4,
-}
+from app.schemas import Severity
 
 RAIN_NAMES = {
     "WRAINA": "Amber Rainstorm Warning",
@@ -14,17 +9,13 @@ RAIN_NAMES = {
 }
 
 PERSONAL = {
-    "request_address": "101 Wu Shan Road",
+    "request_address": "1 Tuen Mun Heung Sze Wui Road",
     "district": "屯門",
-    "latitude": 22.37693,
-    "longitude": 113.96868,
-    "northing": 826429.0,
-    "easting": 814827.0,
-    "building_name_zh": "青山魚類批發市場",
-    "building_name_en": "CASTLE PEAK WHOLESALE FISH MARKET",
-    "geocode_score": 88.75,
-    "is_domestic_helper": True,
-    "has_pets": True,
+    "latitude": 22.39,
+    "longitude": 113.97,
+    "geocode_score": 70.0,
+    "is_domestic_helper": False,
+    "has_pets": False,
     "housing": "standard",
     "has_bedridden": False,
 }
@@ -70,34 +61,19 @@ def _weather_with_rain(code: str) -> dict:
     return weather
 
 
-def _tier_value(tier) -> str:
-    if hasattr(tier, "value"):
-        return tier.value
-    return str(tier)
-
-
 def _peak_severity(result) -> int:
-    abstained = result["abstained"] if isinstance(result, dict) else result.abstained
-    assert abstained is False
-    advice = result["advice"] if isinstance(result, dict) else result.advice
-    situational = []
-    for item in advice:
-        code = item["code"] if isinstance(item, dict) else item.code
-        if code == "emergency_999":
-            continue
-        situational.append(item)
+    assert result.abstained is False
+    situational = [item for item in result.advice if item.code == "rainstorm_level"]
     assert situational, "same situation must still produce rain advice"
-    ranks = []
-    for item in situational:
-        tier = item["tier"] if isinstance(item, dict) else item.tier
-        ranks.append(TIER_RANK[_tier_value(tier)])
-    return max(ranks)
+    return max(item.tier.rank for item in situational)
 
 
-def test_black_rain_severity_gte_red_gte_yellow_same_situation():
+def test_black_rain_severity_gt_yellow_same_situation():
     from tests.helpers import run_evaluate
 
     black = _peak_severity(run_evaluate(PERSONAL, _weather_with_rain("WRAINB")))
     red = _peak_severity(run_evaluate(PERSONAL, _weather_with_rain("WRAINR")))
     yellow = _peak_severity(run_evaluate(PERSONAL, _weather_with_rain("WRAINA")))
     assert black >= red >= yellow
+    assert black > yellow
+    assert Severity.DANGER.rank > Severity.WARNING.rank > Severity.CAUTION.rank

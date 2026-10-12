@@ -10,6 +10,7 @@
     .dont, .danger { border-color: #b00020; }
     .hotline { font-size: 20px; font-weight: bold; }
     .meta { font-size: 12px; color: #666; }
+    .omit { font-size: 13px; color: #666; }
   </style>
 </head>
 <body>
@@ -23,8 +24,22 @@
     <p>{{ block.body }}</p>
   </section>
   {% endfor %}
+  {% for outcome in block_outcomes %}
+    {% if not outcome.rendered %}
+    <p class="omit">{{ outcome.block.value|upper }} 未显示：{{ outcome.omitted_reason }}</p>
+    {% endif %}
+  {% endfor %}
   {% if contact %}
   <p class="hotline">{{ contact.label }} {{ contact.hotline }}</p>
+  {% if contact.sms_hotline %}
+  <p>听障 / 语障紧急求助：{{ contact.sms_hotline }}（传真或短讯）</p>
+  {% endif %}
+  {% if contact.had_hotline %}
+  <p>民政热线 {{ contact.had_hotline }} · {{ contact.had_hours }}</p>
+  {% endif %}
+  {% if contact.enquiry %}
+  <p>非紧急查询 {{ contact.enquiry }}</p>
+  {% endif %}
   {% endif %}
   {% if not_considered %}
   <p class="meta">未纳入：{{ not_considered|join("、") }}</p>

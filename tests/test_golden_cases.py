@@ -19,48 +19,47 @@ def _load_cases():
     return payload["cases"]
 
 
-def _advice_items(result):
-    return getattr(result, "advice", None) or []
-
-
-def _safety_critical(item):
-    return item["safety_critical"] if isinstance(item, dict) else item.safety_critical
-
-
 CASES = _load_cases()
 CASE_IDS = [case["id"] for case in CASES]
+
+
+def test_golden_catalog_covers_required_ids():
+    assert REQUIRED_IDS.issubset(set(CASE_IDS))
+    assert len(CASES) >= 6
 
 
 @pytest.mark.parametrize("case", CASES, ids=CASE_IDS)
 def test_golden_case(case):
     from tests.helpers import run_evaluate
 
-    assert REQUIRED_IDS.issubset(set(CASE_IDS))
-    assert len(CASES) >= 6
     result = run_evaluate(case["personal"], case["weather"])
     expect = case["expect"]
 
-    abstained = result["abstained"] if isinstance(result, dict) else result.abstained
-    assert abstained is expect["abstained"]
+    assert result.abstained is expect["abstained"]
 
-    reason = (
-        result.get("abstain_reason")
-        if isinstance(result, dict)
-        else result.abstain_reason
-    )
     needle = expect.get("abstain_reason_contains")
     if needle:
-        assert reason, f"{case['id']} missing abstain_reason"
-        assert needle in reason
+        assert result.abstain_reason, f"{case['id']} missing abstain_reason"
+        assert needle in result.abstain_reason
 
-    fired = result["fired_rules"] if isinstance(result, dict) else result.fired_rules
     for rule_id in expect.get("fired_rules_contains", []):
-        assert rule_id in fired, f"{case['id']} missing fired rule {rule_id}"
+        assert rule_id in result.fired_rules, f"{case['id']} missing fired rule {rule_id}"
 
-    advice = _advice_items(result)
     min_advice = expect.get("min_advice")
     if min_advice is not None:
-        assert len(advice) >= min_advice
+        assert len(result.advice) >= min_advice
 
     if expect.get("any_safety_critical"):
-        assert any(_safety_critical(item) for item in advice)
+        assert any(item.safety_critical for item in result.advice)
+
+    if expect.get("not_considered_contains"):
+        for item in expect["not_considered_contains"]:
+            assert item in result.not_considered
+
+    if expect.get("contact_hours_contains"):
+        assert result.contact is not None
+        assert expect["contact_hours_contains"] in (result.contact.had_hours or "")
+
+    if expect.get("contact_mode"):
+        assert result.contact is not None
+        assert result.contact.mode.value == expect["contact_mode"]
