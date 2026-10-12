@@ -1,0 +1,49 @@
+{\rtf1\ansi\ansicpg936\cocoartf2868
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 - id: SH_ACTIVATION_CONDITION\
+  description: \uc0\u39118 \u26292 \u20020 \u26102 \u24199 \u25252 \u20013 \u24515 \u30340 \u23448 \u26041 \u21551 \u21160 \u26465 \u20214 \
+  when:\
+    any:\
+      - warning_in_force: [WRAINR, WRAINB]\
+      - warning_in_force: [WL]\
+      - warning_in_force: [WTCSGNL]   # \uc0\u38656 \u37197 \u21512  subtype \u8805  8\
+  then:\
+    shelter_may_open: true\
+    status_certainty: "discretionary"   # \uc0\u20851 \u38190 \u65306 \u21487 \u33021 \u24320 \u65292 \u19981 \u31561 \u20110 \u24050 \u24320 \
+  source:\
+    label: "HAD Emergency Services"\
+    url: "https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm"\
+    quote: >\
+      At time of emergencies, suitable temporary shelter(s) will be open as and\
+      when needed at the discretion of District Officer(s) for providing temporary\
+      accommodation to evacuees and other displaced persons.\
+\
+- id: SH_NEVER_ASSERT_OPEN\
+  description: >\
+    \uc0\u31995 \u32479 \u22312 \u20219 \u20309 \u24773 \u20917 \u19979 \u19981 \u24471 \u22768 \u31216 \u26576 \u24199 \u25252 \u25152 \u12300 \u24320 \u25918 \u12301 \u65292 \u38500 \u38750 \u26377 \u24403 \u26085 \u26032 \u38395 \u31295 \u25110 \u21306 \u27665 \u25919 \u22788 \u20844 \u21578 \u20316 \u20026 \u20020 \u26102 \u20973 \u35777 \u12290 \
+    \uc0\u21542 \u21017 \u21482 \u33021 \u26174 \u31034 \u12300 \u31526 \u21512 \u21551 \u21160 \u26465 \u20214 \u65292 \u29366 \u24577 \u26410 \u30830 \u35748 \u12301 \u24182 \u32473 \u20986 \u26597 \u35810 \u28909 \u32447 \u12290 \
+  guardrail: true\
+  enforced_by: "tests/test_guardrails.py::test_never_assert_shelter_open"\
+  source:\
+    label: "HAD Temporary Shelters List (PDF header)"\
+    url: "https://www.had.gov.hk/file_manager/en/documents/public_services/emergency_services/HAD_Temporary_Shelters_List_EN.pdf"\
+    quote: "For reference only"\
+## \uc0\u20197 \u19978 \u20869 \u23481 \u24314 \u35758 \u20445 \u30041 \
+\
+- id: SH_HEAT_HOURS\
+  description: \uc0\u36991 \u26257 \u20013 \u24515 \u22812 \u38388 \u25552 \u20379 \u24202 \u38138 \u30340 \u26102 \u27573 \u65288 \u20165 \u22312 \u37239 \u28909 \u22825 \u27668 \u35686 \u21578 \u29983 \u25928 \u26102 \u24320 \u25918 \u65289 \
+  when: \{ warning_in_force: [WHOT] \}\
+  then:\
+    bedding_window: "22:30-08:00"\
+    advice_ids: [ADV_HEAT_SHELTER_HOURS]\
+  source:\
+    label: "info.gov.hk \'97 HAD opens temporary heat shelters"\
+    url: "https://www.info.gov.hk/gia/general/202609/21/P2026092100557.htm"\
+    quote: >\
+      From 10.30pm to 8am the next day, the temporary heat shelters will also\
+      provide bedding and a sleeping place for people in need.}
