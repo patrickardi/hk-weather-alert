@@ -1,0 +1,94 @@
+{
+  "abstained": false,
+  "abstain_reason": null,
+  "fired_rules": [
+    "tc10_active",
+    "precautions_tc8plus",
+    "shelter_nearest",
+    "work_tc8plus",
+    "had_hotline"
+  ],
+  "advice": [
+    {
+      "code": "tc10_active",
+      "title": "[示範 SAMPLE] 十號颶風信號現正生效",
+      "body": "{{TODO: 天文台 2025-07-20 09:20 熱帶氣旋警報原文，逐字貼入}}",
+      "safety_critical": true,
+      "tier": "danger",
+      "provenance": "quote_only",
+      "source_url": "{{TODO: 天文台警告頁面 URL}}",
+      "source_label": "香港天文台",
+      "quote": "{{TODO: 天文台 2025-07-20 09:20 熱帶氣旋警報原文，逐字貼入}}"
+    },
+    {
+      "code": "precautions_tc8plus",
+      "title": "[示範 SAMPLE] 八號或以上信號下的防風措施",
+      "body": "{{TODO: 天文台「熱帶氣旋警告信號」頁，八號/十號信號注意事項原文}}",
+      "safety_critical": true,
+      "tier": "danger",
+      "provenance": "quote_only",
+      "source_url": "{{TODO: 天文台 tcsignal 頁 URL}}",
+      "source_label": "香港天文台",
+      "quote": "{{TODO: 天文台「熱帶氣旋警告信號」頁，八號/十號信號注意事項原文}}"
+    },
+    {
+      "code": "shelter_nearest",
+      "title": "[示範 SAMPLE] 最近的臨時庇護中心",
+      "body": "{{TODO: 民政事務總署臨時庇護中心名單中該區那一行（名稱＋地址），逐字}}",
+      "safety_critical": true,
+      "tier": "warning",
+      "provenance": "quote_only",
+      "source_url": "{{TODO: 民政事務總署庇護中心頁 URL}}",
+      "source_label": "民政事務總署",
+      "quote": "{{TODO: 民政事務總署臨時庇護中心名單中該區那一行（名稱＋地址），逐字}}"
+    },
+    {
+      "code": "work_tc8plus",
+      "title": "[示範 SAMPLE] 八號或以上信號期間的工作安排",
+      "body": "{{TODO: 勞工處《颱風及暴雨警告下工作守則》八號信號相關條文原文}}",
+      "safety_critical": true,
+      "tier": "warning",
+      "provenance": "quote_only",
+      "source_url": "{{TODO: 勞工處守則 URL}}",
+      "source_label": "勞工處",
+      "quote": "{{TODO: 勞工處《颱風及暴雨警告下工作守則》八號信號相關條文原文}}"
+    },
+    {
+      "code": "had_hotline",
+      "title": "[示範 SAMPLE] 民政事務總署緊急熱線",
+      "body": "{{TODO: 民政事務總署熱線號碼及服務時間原文（八號或以上信號期間版本）}}",
+      "safety_critical": true,
+      "tier": "warning",
+      "provenance": "quote_only",
+      "source_url": "{{TODO: 民政事務總署熱線頁 URL}}",
+      "source_label": "民政事務總署",
+      "quote": "{{TODO: 民政事務總署熱線號碼及服務時間原文（八號或以上信號期間版本）}}"
+    }
+  ],
+  "blocks": [
+    {
+      "kind": "active_warning",
+      "title": "[示範 SAMPLE] 現正生效的警告",
+      "body": "十號颶風信號 · 09:20 發出",
+      "code": "TC10"
+    },
+    {
+      "kind": "observation",
+      "title": "[示範 SAMPLE] 你所在地區的實況",
+      "body": "{{TODO: 區名}} 過去一小時雨量 {{TODO: max_mm}} 毫米 · 氣溫 {{TODO: value_c}}°C（09:00）",
+      "code": ""
+    },
+    {
+      "kind": "footer",
+      "title": "",
+      "body": "[示範 SAMPLE] 以上安全文字逐字引用自官方來源，本服務不作改寫。資料時間 2025-07-20 09:20。",
+      "code": ""
+    }
+  ],
+  "contact": {
+    "hotline": "999",
+    "label": "[示範 SAMPLE] 如遇緊急情況，請致電 999"
+  },
+  "not_considered": ["pets", "domestic_helper", "bedridden"],
+  "stale_as_of": "2025-07-20T09:20:00+08:00"
+}
