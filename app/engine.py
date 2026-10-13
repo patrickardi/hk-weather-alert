@@ -1,19 +1,18 @@
 from app.mapping import to_hko_place
-from app.rules import get_rule
+from app.rules import get_rule, load_contacts
 from app.schemas import (
     AdviceItem,
     Block,
     BlockOutcome,
     CardBlock,
     ContactInfo,
-    HAD_ROUND_THE_CLOCK_CODES,
-    HotlineMode,
+    ContactSpec,
     Housing,
     PersonalContext,
     RiskResponse,
     Rule,
+    SHELTER_OMIT_REASON,
     Severity,
-    TC8_PLUS_TYPES,
     WeatherState,
 )
 
@@ -58,30 +57,60 @@ def _block_kind(item: AdviceItem) -> str:
     return "do"
 
 
+def _contact_from_spec(spec: ContactSpec) -> ContactInfo:
+    return ContactInfo(
+        had_hotline=spec.had_hotline,
+        had_hours=spec.had_hours,
+        enquiry=spec.enquiry,
+        mode=spec.mode,
+        source_url=spec.source.url,
+        source_label=spec.source.label,
+        retrieved_on=spec.source.retrieved_on,
+    )
+
+
 def compute_contact(weather: WeatherState | None) -> ContactInfo:
+    specs = load_contacts()
+    default = next((item for item in specs if item.default), None)
     if weather is None:
-        return ContactInfo()
+        return _contact_from_spec(default) if default else ContactInfo()
     codes = {item.code for item in weather.warnings.values()}
     types = {item.warning_type for item in weather.warnings.values() if item.warning_type}
-    if codes.intersection(HAD_ROUND_THE_CLOCK_CODES) or types.intersection(TC8_PLUS_TYPES):
-        return ContactInfo(
-            had_hotline="2572 8427",
-            had_hours="24小时",
-            mode=HotlineMode.HAD_ROUND_THE_CLOCK,
-        )
-    if "WHOT" in codes:
-        return ContactInfo(
-            had_hotline="2572 8427",
-            had_hours="午夜前",
-            mode=HotlineMode.HAD_UNTIL_MIDNIGHT,
-        )
-    return ContactInfo(mode=HotlineMode.GOV_1823)
+    for spec in specs:
+        if spec.default:
+            continue
+        if codes.intersection(spec.codes) or types.intersection(spec.types):
+            return _contact_from_spec(spec)
+    return _contact_from_spec(default) if default else ContactInfo()
 
 
 def _address_unconfirmed(personal: PersonalContext | None) -> bool:
     if personal is None:
         return True
-    return personal.geocode_candidate_count is not None
+    count = personal.geocode_candidate_count
+    if count is None:
+        return False
+    return count != 1
+
+
+def _human_not_considered(key: str) -> str:
+    labels = {
+        "weather_snapshot": "没有天气快照",
+        "uv_index": "紫外线指数未知",
+        "is_domestic_helper": "未询问是否外佣",
+        "has_pets": "未询问是否有宠物",
+        "has_bedridden": "未询问家中是否有卧床者",
+        "housing": "未询问住所类型",
+    }
+    if key in labels:
+        return labels[key]
+    if key.startswith("rainfall.main:"):
+        place = key.split(":", 1)[1]
+        return f"{place}的雨量主站标记未知"
+    if key.startswith("actionCode:CANCEL:"):
+        code = key.split(":")[-1]
+        return f"{code}警告已取消，不计入生效警告"
+    return key
 
 
 def _block_outcomes(
@@ -92,16 +121,16 @@ def _block_outcomes(
     weather: WeatherState | None,
 ) -> list[BlockOutcome]:
     if abstained:
-        reason = abstain_reason or "整卡弃答"
+        reason = abstain_reason or "资料不足，无法给出针对你处境的行动建议"
         return [
             BlockOutcome(block=Block.ACTIVE_WARNINGS, rendered=False, omitted_reason=reason),
             BlockOutcome(block=Block.LOCAL_OBSERVATION, rendered=False, omitted_reason=reason),
-            BlockOutcome(block=Block.SHELTER, rendered=False, omitted_reason=reason),
+            BlockOutcome(block=Block.SHELTER, rendered=False, omitted_reason=SHELTER_OMIT_REASON),
             BlockOutcome(block=Block.HOUSING_RISK, rendered=False, omitted_reason=reason),
             BlockOutcome(
                 block=Block.WORK,
                 rendered=False,
-                omitted_reason="劳工处工作热压力警告不在 warnsum，本卡不覆盖休息安排",
+                omitted_reason="劳工处工作热压力警告不在天文台警告摘要内，本卡不覆盖休息安排",
             ),
             BlockOutcome(block=Block.CONTACT, rendered=True),
         ]
@@ -109,8 +138,10 @@ def _block_outcomes(
     place = to_hko_place(personal.district) if personal and personal.district else None
     local_ok = place is not None
     housing_ok = bool(personal and personal.housing is not None and not unconfirmed)
-    if unconfirmed:
-        housing_reason = "未能确认地址，不显示住屋风险"
+    if personal is None or personal.housing is None:
+        housing_reason = "未询问住所类型，未纳入住屋风险"
+    elif unconfirmed:
+        housing_reason = "地址未能唯一对应，不显示住屋风险"
     else:
         housing_reason = "未询问住所类型，未纳入住屋风险"
     return [
@@ -123,7 +154,7 @@ def _block_outcomes(
         BlockOutcome(
             block=Block.SHELTER,
             rendered=False,
-            omitted_reason="未能确认地址，不显示庇护所，以免导向错误地点",
+            omitted_reason=SHELTER_OMIT_REASON,
         ),
         BlockOutcome(
             block=Block.HOUSING_RISK,
@@ -133,7 +164,7 @@ def _block_outcomes(
         BlockOutcome(
             block=Block.WORK,
             rendered=False,
-            omitted_reason="劳工处工作热压力警告不在 warnsum，本卡不覆盖休息安排",
+            omitted_reason="劳工处工作热压力警告不在天文台警告摘要内，本卡不覆盖休息安排",
         ),
         BlockOutcome(block=Block.CONTACT, rendered=True),
     ]
@@ -189,7 +220,7 @@ def pack_response(
             weather=weather,
         ),
         contact=compute_contact(weather),
-        not_considered=not_considered,
+        not_considered=[_human_not_considered(item) for item in not_considered],
         stale_as_of=stale,
     )
 
@@ -219,7 +250,7 @@ def abstain_sources_disagree() -> RiskResponse:
     advice, fired = _with_emergency([], [rule.id])
     return pack_response(
         abstained=True,
-        abstain_reason="warnsum 与实时天气报告不一致",
+        abstain_reason="天文台警告摘要与分区天气报告不一致，无法判断当前警告",
         fired_rules=fired,
         advice=advice,
     )
@@ -249,8 +280,6 @@ def evaluate(personal: PersonalContext, weather: WeatherState) -> RiskResponse:
     codes = _warning_codes(weather)
     fired: list[str] = []
     advice: list[AdviceItem] = []
-    unconfirmed = _address_unconfirmed(personal)
-
     if not codes:
         status = get_rule("no_active_warning_status")
         fired.append(status.id)
@@ -272,26 +301,22 @@ def evaluate(personal: PersonalContext, weather: WeatherState) -> RiskResponse:
         fired.append(rain_rule.id)
         advice.append(_advice_from_rule(rain_rule, severity=RAIN_SEVERITY[top]))
 
-    if not unconfirmed and "WRAINB" in codes and personal.is_domestic_helper is True:
+    if "WRAINB" in codes and personal.is_domestic_helper is True:
         rule = get_rule("helper_black_rain")
         fired.append(rule.id)
         advice.append(_advice_from_rule(rule))
 
-    if not unconfirmed and "WRAINB" in codes and personal.has_pets is True:
+    if "WRAINB" in codes and personal.has_pets is True:
         rule = get_rule("pets_black_rain")
         fired.append(rule.id)
         advice.append(_advice_from_rule(rule))
 
-    if not unconfirmed and "WRAINB" in codes and personal.has_bedridden is True:
+    if "WRAINB" in codes and personal.has_bedridden is True:
         rule = get_rule("bedridden_black_rain")
         fired.append(rule.id)
         advice.append(_advice_from_rule(rule))
 
-    if (
-        not unconfirmed
-        and "WL" in codes
-        and personal.housing is Housing.ROOFTOP
-    ):
+    if "WL" in codes and personal.housing is Housing.ROOFTOP:
         rule = get_rule("rooftop_landslip")
         fired.append(rule.id)
         advice.append(_advice_from_rule(rule))

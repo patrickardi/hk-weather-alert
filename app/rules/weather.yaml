@@ -64,7 +64,7 @@ rules:
     provenance: template
     severity: advisory
     title: 目前没有生效的天气警告
-    body: 目前没有生效的天气警告。请继续留意天文台更新。此卡不覆盖劳工处工作热压力警告，也不覆盖未列入 warnsum 的酷热天气特别报告。
+    body: 目前没有生效的天气警告。请继续留意天文台更新。此卡不覆盖劳工处工作热压力警告，也不覆盖未列入天文台警告摘要的酷热天气特别报告。
     source:
       quote: 现时并无生效的天气警告。
       url: https://www.hko.gov.hk/tc/warnsum/intro.htm
@@ -136,9 +136,64 @@ rules:
     provenance: template
     severity: advisory
     title: 上游数据不一致
-    body: warnsum 与实时天气报告的警告信息不一致，整卡弃答。
+    body: 天文台警告摘要与分区天气报告不一致，无法判断当前警告。
     source:
       quote: An empty warnsum body is indistinguishable from a broken upstream.
       url: https://www.hko.gov.hk/
       label: 香港天文台
+      retrieved_on: "2026-09-28"
+
+contacts:
+  - id: contact_had_round_the_clock
+    mode: had_round_the_clock
+    codes: [WRAINR, WRAINB, WL]
+    types: [TC8NE, TC8SE, TC8NW, TC8SW, TC9, TC10]
+    had_hotline: "2572 8427"
+    had_hours: "24小时"
+    enquiry: "1823"
+    source:
+      quote: >-
+        In the event that tropical cyclone warning signal No.8 or above, landslip
+        warning or red/black rainstorm warning is in force, the Home Affairs
+        Department's Emergency Co-ordination Centre with the emergency hotline
+        will be activated round-the-clock to answer relevant enquiries.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
+  - id: contact_had_until_midnight
+    mode: had_until_midnight
+    codes: [WHOT]
+    had_hotline: "2572 8427"
+    had_hours: "午夜前"
+    enquiry: "1823"
+    source:
+      quote: please call the department's hotline before midnight on 2572 8427
+      url: https://www.info.gov.hk/gia/general/202609/29/P2026092900557.htm
+      label: 政府新闻公报
+      retrieved_on: "2026-09-29"
+
+  - id: contact_cold_shelter
+    mode: had_office_hours
+    codes: [WCOLD]
+    had_hotline: "2835 2500"
+    had_hours: "办公时间"
+    enquiry: "1823"
+    source:
+      quote: >-
+        We also open temporary cold shelters during cold spells to people who
+        need to take refuge from cold. For more information, please call our
+        Telephone Enquiry Centre at 2835 2500 during office hours.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
+  - id: contact_1823
+    mode: gov_1823
+    default: true
+    enquiry: "1823"
+    source:
+      quote: 1823 provides 24-hour government enquiry service.
+      url: https://www.1823.gov.hk/
+      label: "1823"
       retrieved_on: "2026-09-28"

@@ -293,7 +293,7 @@ cases:
     expect:
       abstained: false
       not_considered_contains:
-        - housing
+        - 未询问住所类型
       fired_rules_contains:
         - no_active_warning_status
 

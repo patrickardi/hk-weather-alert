@@ -51,7 +51,7 @@ SAMPLES = {
             )
         ],
         contact=ContactInfo(),
-        not_considered=["uv_index", "rainfall.main:屯門"],
+        not_considered=["紫外线指数未知", "屯門的雨量主站标记未知"],
         stale_as_of="2026-09-25T14:00:00+08:00",
     )
 }

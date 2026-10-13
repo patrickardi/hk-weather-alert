@@ -26,7 +26,7 @@
   {% endfor %}
   {% for outcome in block_outcomes %}
     {% if not outcome.rendered %}
-    <p class="omit">{{ outcome.block.value|upper }} 未显示：{{ outcome.omitted_reason }}</p>
+    <p class="omit">{{ outcome.omitted_reason }}</p>
     {% endif %}
   {% endfor %}
   {% if contact %}

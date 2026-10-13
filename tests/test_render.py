@@ -7,7 +7,7 @@ def test_sample_card_has_status_contact_and_blocks():
     assert "STATUS" in html
     assert "999" in html
     assert "DONT" in html
-    assert "uv_index" in html
+    assert "紫外线指数未知" in html
 
 
 def test_hotline_does_not_repeat_number():

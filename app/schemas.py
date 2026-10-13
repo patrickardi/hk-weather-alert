@@ -7,6 +7,7 @@ FALLBACK_CODES = frozenset({"emergency_999", "emergency_sms_992", "where_to_ask"
 TC8_PLUS_TYPES = frozenset({"TC8NE", "TC8SE", "TC8NW", "TC8SW", "TC9", "TC10"})
 HAD_ROUND_THE_CLOCK_CODES = frozenset({"WRAINR", "WRAINB", "WL"})
 BANNED_PHRASES = frozenset({"typhoon shelter", "Typhoon shelter", "避风塘"})
+SHELTER_OMIT_REASON = "本卡不显示庇护所位置，请致电 1823"
 
 
 class Severity(str, Enum):
@@ -50,6 +51,7 @@ class Block(str, Enum):
 class HotlineMode(str, Enum):
     HAD_ROUND_THE_CLOCK = "had_round_the_clock"
     HAD_UNTIL_MIDNIGHT = "had_until_midnight"
+    HAD_OFFICE_HOURS = "had_office_hours"
     GOV_1823 = "gov_1823"
 
 
@@ -178,6 +180,9 @@ class ContactInfo(BaseModel):
     had_hours: str | None = None
     enquiry: str = "1823"
     mode: HotlineMode = HotlineMode.GOV_1823
+    source_url: str = ""
+    source_label: str = ""
+    retrieved_on: date | None = None
 
 
 class AdviceItem(BaseModel):
@@ -240,6 +245,26 @@ class RuleSource(BaseModel):
     url: str = ""
     label: str = ""
     retrieved_on: date | None = None
+
+
+class ContactSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: str
+    mode: HotlineMode
+    codes: tuple[str, ...] = ()
+    types: tuple[str, ...] = ()
+    had_hotline: str | None = None
+    had_hours: str | None = None
+    enquiry: str = "1823"
+    default: bool = False
+    source: RuleSource
+
+    @model_validator(mode="after")
+    def _needs_source(self):
+        if not self.source.url or self.source.retrieved_on is None:
+            raise ValueError(f"{self.id}: contact needs source url and retrieved_on")
+        return self
 
 
 class Rule(BaseModel):

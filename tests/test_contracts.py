@@ -8,6 +8,7 @@ import pytest
 from app.adapters import build_card, personal_from_als, weather_from_hko
 from app.engine import evaluate
 from app.probe import ALS_SHAPES
+from app.render import render_from_fixtures, render_html
 from app.schemas import (
     ActiveWarning,
     Block,
@@ -156,6 +157,19 @@ def test_als_two_candidates_omits_shelter():
     assert _outcome(result, Block.ACTIVE_WARNINGS).rendered is True
 
 
+def test_als_single_candidate_helper_black_rain_fires():
+    personal = personal_from_als(
+        json.loads(_load("als_101_wu_shan_road.json")),
+        is_domestic_helper=True,
+    )
+    assert personal.geocode_candidate_count == 1
+    weather = WeatherState(
+        warnings={"WRAINB": _warning("WRAINB", name="Black Rainstorm Warning", warning_type="Black")}
+    )
+    result = evaluate(personal, weather)
+    assert "helper_black_rain" in result.fired_rules
+
+
 def test_wu_shan_rain_rendered_shelter_omitted():
     personal = personal_from_als(json.loads(_load("als_101_wu_shan_road.json")))
     assert personal.geocode_candidate_count == 1
@@ -165,7 +179,7 @@ def test_wu_shan_rain_rendered_shelter_omitted():
     assert "rainstorm_level" in result.fired_rules
     assert _outcome(result, Block.ACTIVE_WARNINGS).rendered is True
     assert _outcome(result, Block.SHELTER).rendered is False
-    assert "庇护所" in (_outcome(result, Block.SHELTER).omitted_reason or "")
+    assert _outcome(result, Block.SHELTER).omitted_reason == "本卡不显示庇护所位置，请致电 1823"
 
 
 def test_very_hot_contact_until_midnight():
@@ -197,7 +211,7 @@ def test_t8_contact_round_the_clock():
 
 def test_housing_none_is_stated():
     result = evaluate(_ctx(), WeatherState(warnings={}))
-    assert "housing" in result.not_considered
+    assert "未询问住所类型" in result.not_considered
     assert _outcome(result, Block.HOUSING_RISK).rendered is False
 
 
@@ -220,3 +234,31 @@ def test_rainfall_main_accepts_values_other_than_false():
 def test_probe_als_shapes_are_the_three_required():
     assert set(ALS_SHAPES) == {"village", "estate", "nonexistent"}
     assert "Long Ping Estate" in ALS_SHAPES["estate"]
+
+
+def test_user_copy_has_no_developer_keys():
+    html = render_from_fixtures()
+    for token in ("warnsum", "rainfall.main", "actionCode", "uv_index"):
+        assert token not in html
+
+
+def test_wcold_uses_had_office_hotline():
+    result = evaluate(
+        _ctx(),
+        WeatherState(warnings={"WCOLD": _warning("WCOLD", name="Cold Weather Warning")}),
+    )
+    assert result.contact.mode is HotlineMode.HAD_OFFICE_HOURS
+    assert result.contact.had_hotline == "2835 2500"
+    assert result.contact.source_url
+    assert result.contact.retrieved_on is not None
+
+
+def test_computed_contact_carries_source():
+    result = evaluate(
+        _ctx(),
+        WeatherState(warnings={"WHOT": _warning("WHOT", name="Very Hot Weather Warning")}),
+    )
+    assert result.contact.source_url
+    assert result.contact.retrieved_on is not None
+    html = render_html(result)
+    assert "warnsum" not in html
