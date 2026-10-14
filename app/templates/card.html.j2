@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="{{ 'en' if lang == 'en' else 'zh-Hant' }}">
 <head>
   <meta charset="utf-8">
   <title>天气风险卡</title>
@@ -11,16 +11,35 @@
     .hotline { font-size: 20px; font-weight: bold; }
     .meta { font-size: 12px; color: #666; }
     .omit { font-size: 13px; color: #666; }
+    .diff { background: #111; color: #fff; padding: 10px 12px; font-size: 14px; }
+    .peak-danger { background: #fff5f5; }
+    .peak-warning { background: #fff8e8; }
+    .peak-caution { background: #f4f7ff; }
+    .shelter { border-color: #0b57d0; }
+    .caution { border-color: #c47b00; }
+    body.large { font-size: 26px; max-width: 480px; }
+    body.large .status { font-size: 20px; }
+    body.large h2 { font-size: 32px; margin: 0 0 12px; }
+    body.large .item p { font-size: 26px; line-height: 1.35; }
+    body.large .hotline { font-size: 48px; line-height: 1.1; }
+    body.large .omit, body.large .meta { display: none; }
+    body.large .diff { font-size: 18px; }
   </style>
 </head>
-<body>
+<body class="peak-{{ peak_name }}{% if large %} large{% endif %}">
+  {% if diff_label %}
+  <p class="diff">{{ diff_label }}</p>
+  {% endif %}
   <p class="status">STATUS · {{ stale_as_of or "时间未知" }}</p>
+  {% if location_line %}
+  <p class="status">{{ location_line }}</p>
+  {% endif %}
   {% if abstained %}
   <p>无法给出针对你处境的行动建议。{{ abstain_reason }}</p>
   {% endif %}
   {% for block in blocks %}
   <section class="item {{ block.kind }}">
-    <h2>{{ block.kind|upper }} · {{ block.title }}</h2>
+    <h2>{% if not large %}{{ block.kind|upper }} · {% endif %}{{ block.title }}</h2>
     <p>{{ block.body }}</p>
   </section>
   {% endfor %}
@@ -30,19 +49,28 @@
     {% endif %}
   {% endfor %}
   {% if contact %}
+    {% if lang == 'en' %}
+  <p class="hotline">In an emergency, call {{ contact.hotline }}</p>
+  <p>SMS / fax: {{ contact.sms_hotline }}</p>
+      {% if contact.had_hotline %}
+  <p>HAD hotline {{ contact.had_hotline }} · {{ contact.had_hours }}</p>
+      {% endif %}
+  <p>Non-emergency {{ contact.enquiry }}</p>
+    {% else %}
   <p class="hotline">{{ contact.label }} {{ contact.hotline }}</p>
-  {% if contact.sms_hotline %}
+      {% if not large and contact.sms_hotline %}
   <p>听障 / 语障紧急求助：{{ contact.sms_hotline }}（传真或短讯）</p>
-  {% endif %}
-  {% if contact.had_hotline %}
+      {% endif %}
+      {% if contact.had_hotline %}
   <p>民政热线 {{ contact.had_hotline }} · {{ contact.had_hours }}</p>
-  {% endif %}
-  {% if contact.enquiry %}
+      {% endif %}
+      {% if not large and contact.enquiry %}
   <p>非紧急查询 {{ contact.enquiry }}</p>
-  {% endif %}
+      {% endif %}
+    {% endif %}
   {% endif %}
   {% if not_considered %}
-  <p class="meta">未纳入：{{ not_considered|join("、") }}</p>
+  <p class="meta">{{ 'Not included' if lang == 'en' else '未纳入' }}：{{ not_considered|join("、") }}</p>
   {% endif %}
 </body>
 </html>

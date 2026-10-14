@@ -141,7 +141,7 @@ def test_als_zero_candidates_omits_shelter_and_housing():
     weather = WeatherState(warnings={"WRAINR": _warning("WRAINR", name="Red Rainstorm Warning", warning_type="Red")})
     result = evaluate(personal, weather)
     assert result.abstained is False
-    assert _outcome(result, Block.SHELTER).rendered is False
+    assert _outcome(result, Block.SHELTER).rendered is True
     assert _outcome(result, Block.HOUSING_RISK).rendered is False
     assert _outcome(result, Block.ACTIVE_WARNINGS).rendered is True
 
@@ -153,7 +153,7 @@ def test_als_two_candidates_omits_shelter():
     assert personal.geocode_candidate_count == 2
     weather = WeatherState(warnings={"WRAINR": _warning("WRAINR", name="Red Rainstorm Warning", warning_type="Red")})
     result = evaluate(personal, weather)
-    assert _outcome(result, Block.SHELTER).rendered is False
+    assert _outcome(result, Block.SHELTER).rendered is True
     assert _outcome(result, Block.ACTIVE_WARNINGS).rendered is True
 
 
@@ -178,8 +178,10 @@ def test_wu_shan_rain_rendered_shelter_omitted():
     assert result.abstained is False
     assert "rainstorm_level" in result.fired_rules
     assert _outcome(result, Block.ACTIVE_WARNINGS).rendered is True
-    assert _outcome(result, Block.SHELTER).rendered is False
-    assert _outcome(result, Block.SHELTER).omitted_reason == "本卡不显示庇护所位置，请致电 1823"
+    assert _outcome(result, Block.SHELTER).rendered is True
+    html = render_html(result)
+    assert "1823" in html
+    assert "开放中" in html
 
 
 def test_very_hot_contact_until_midnight():

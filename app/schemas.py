@@ -117,6 +117,8 @@ class PersonalContext(BaseModel):
     has_pets: bool | None = None
     housing: Housing | None = None
     has_bedridden: bool | None = None
+    language: str = "zh"
+    needs_large_type: bool = False
 
 
 class WeatherState(BaseModel):
@@ -224,6 +226,9 @@ class RiskResponse(BaseModel):
     contact: ContactInfo | None = None
     not_considered: list[str] = Field(default_factory=list)
     stale_as_of: str | None = None
+    location_line: str | None = None
+    language: str = "zh"
+    needs_large_type: bool = False
 
     @model_validator(mode="after")
     def _abstain_contract(self):
@@ -277,6 +282,8 @@ class Rule(BaseModel):
     severity: Severity
     title: str
     body: str
+    title_en: str = ""
+    body_en: str = ""
 
     @model_validator(mode="after")
     def _safety_critical_source(self):

@@ -11,6 +11,42 @@ rules:
       label: 香港天文台
       retrieved_on: "2026-09-28"
 
+  - id: helper_tc8plus
+    safety_critical: true
+    provenance: template
+    severity: warning
+    title: 八号或以上 · 外佣留在室内
+    title_en: Signal 8 or above · stay indoors
+    body: 八号或以上信号生效时，应留在安全的室内，不要外出。先确保自身安全。
+    body_en: When Signal 8 or above is in force, stay indoors in a safe place. Do not go out. Keep yourself safe first.
+    source:
+      quote: >-
+        In the event that tropical cyclone warning signal No.8 or above, landslip
+        warning or red/black rainstorm warning is in force, the Home Affairs
+        Department's Emergency Co-ordination Centre with the emergency hotline
+        will be activated round-the-clock.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
+  - id: pets_tc8plus
+    safety_critical: true
+    provenance: template
+    severity: warning
+    title: 八号或以上 · 看管宠物
+    title_en: Signal 8 or above · keep pets indoors
+    body: 把宠物留在室内。不要为了接宠物而外出。
+    body_en: Keep pets indoors. Do not go out to fetch pets.
+    source:
+      quote: >-
+        In the event that tropical cyclone warning signal No.8 or above, landslip
+        warning or red/black rainstorm warning is in force, the Home Affairs
+        Department's Emergency Co-ordination Centre with the emergency hotline
+        will be activated round-the-clock.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
   - id: pets_black_rain
     safety_critical: true
     provenance: quote_only
@@ -47,6 +83,75 @@ rules:
       label: 香港天文台
       retrieved_on: "2026-09-28"
 
+  - id: tc8_in_force
+    safety_critical: true
+    provenance: template
+    severity: warning
+    title: 八号热带气旋警告信号生效
+    title_en: No. 8 signal is in force
+    body: 八号信号生效。留在室内。远离窗户。不要外出。
+    body_en: Signal No. 8 is in force. Stay indoors. Stay away from windows. Do not go out.
+    source:
+      quote: >-
+        In the event that tropical cyclone warning signal No.8 or above, landslip
+        warning or red/black rainstorm warning is in force, the Home Affairs
+        Department's Emergency Co-ordination Centre with the emergency hotline
+        will be activated round-the-clock.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
+  - id: tc10_in_force
+    safety_critical: true
+    provenance: template
+    severity: danger
+    title: 十号飓风信号生效
+    title_en: Hurricane Signal No. 10 is in force
+    body: 十号飓风信号生效。这是最高级别。留在室内最安全的位置。远离窗户。不要外出。
+    body_en: Hurricane Signal No. 10 is in force. This is the highest signal. Stay in the safest indoor place. Stay away from windows. Do not go out.
+    source:
+      quote: >-
+        In the event that tropical cyclone warning signal No.8 or above, landslip
+        warning or red/black rainstorm warning is in force, the Home Affairs
+        Department's Emergency Co-ordination Centre with the emergency hotline
+        will be activated round-the-clock.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
+  - id: tc3_still_in_force
+    safety_critical: true
+    provenance: template
+    severity: caution
+    title: 三号强风信号仍生效
+    title_en: Strong Wind Signal No. 3 is still in force
+    body: 八号已经除下，三号强风信号仍生效。不是一切已过。仍须留意大风，减少非必要外出。
+    body_en: Signal No. 8 has been cancelled. Signal No. 3 is still in force. This is not all-clear. Watch for strong winds and limit non-essential trips.
+    source:
+      quote: >-
+        At time of emergencies, suitable temporary shelter(s) will be open as and
+        when needed at the discretion of District Officer(s).
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
+  - id: shelter_may_open
+    safety_critical: true
+    provenance: template
+    severity: warning
+    title: 临时庇护所（酌情开放）
+    title_en: Temporary shelter (opened only if needed)
+    body: 临时庇护所可能开放，请致电 1823 查询。本卡不显示地点，也不把任何地点写成开放中。
+    body_en: Temporary shelters may open. Call 1823 to check. This card does not list locations and does not say any site is open.
+    source:
+      quote: >-
+        At time of emergencies, suitable temporary shelter(s) will be open as and
+        when needed at the discretion of District Officer(s) for providing
+        temporary accommodation to evacuees and other displaced persons.
+      url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm
+      label: 民政事务总署
+      retrieved_on: "2026-10-12"
+
   - id: rainstorm_level
     safety_critical: true
     provenance: quote_only
@@ -76,7 +181,9 @@ rules:
     provenance: quote_only
     severity: danger
     title: 紧急求助
+    title_en: Emergency
     body: 如遇紧急情况，请致电 999。
+    body_en: In an emergency, call 999.
     source:
       quote: 如遇紧急情况，请致电 999。
       url: https://www.police.gov.hk/ppp_tc/contact_us.html
@@ -88,7 +195,9 @@ rules:
     provenance: template
     severity: danger
     title: 紧急求助（传真 / 短讯）
+    title_en: Emergency SMS / fax
     body: 听障或语障人士如需紧急求助，请使用 992 传真或短讯。
+    body_en: If you cannot use voice calls, use 992 by SMS or fax.
     source:
       quote: Emergency, hearing/speech impaired (fax/SMS) 992
       url: https://www.sb.gov.hk/
@@ -100,7 +209,9 @@ rules:
     provenance: template
     severity: advisory
     title: 查询热线
-    body: 非紧急查询可致电 1823。临时庇护所是否开放由民政事务专员酌情决定，本卡不会把任何地点写成正在开放的庇护所。
+    title_en: Enquiry
+    body: 非紧急查询可致电 1823。临时庇护所是否开放由民政事务专员酌情决定，本卡不会把任何地点写成开放中。
+    body_en: For non-emergency questions, call 1823. Temporary shelters open only at the District Officer's discretion.
     source:
       quote: At time of emergencies, suitable temporary shelter(s) will be open as and when needed at the discretion of District Officer(s).
       url: https://www.had.gov.hk/en/public_services/emergency_services/emergency.htm

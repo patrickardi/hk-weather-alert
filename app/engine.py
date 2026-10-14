@@ -13,6 +13,7 @@ from app.schemas import (
     Rule,
     SHELTER_OMIT_REASON,
     Severity,
+    TC8_PLUS_TYPES,
     WeatherState,
 )
 
@@ -22,6 +23,10 @@ DONT_CODES = {
     "bedridden_black_rain",
     "rooftop_landslip",
     "rainstorm_level",
+    "tc8_in_force",
+    "tc10_in_force",
+    "helper_tc8plus",
+    "pets_tc8plus",
 }
 
 RAIN_SEVERITY = {
@@ -33,12 +38,16 @@ RAIN_CODES = frozenset(RAIN_SEVERITY)
 RAIN_ORDER = ("WRAINA", "WRAINR", "WRAINB")
 
 
-def _advice_from_rule(rule: Rule, *, severity: Severity | None = None) -> AdviceItem:
+def _advice_from_rule(
+    rule: Rule, *, severity: Severity | None = None, lang: str = "zh"
+) -> AdviceItem:
     chosen = severity or rule.severity
+    title = rule.title_en if lang == "en" and rule.title_en else rule.title
+    body = rule.body_en if lang == "en" and rule.body_en else rule.body
     return AdviceItem(
         code=rule.id,
-        title=rule.title,
-        body=rule.body,
+        title=title,
+        body=body,
         safety_critical=rule.safety_critical,
         tier=chosen,
         provenance=rule.provenance,
@@ -52,9 +61,43 @@ def _advice_from_rule(rule: Rule, *, severity: Severity | None = None) -> Advice
 def _block_kind(item: AdviceItem) -> str:
     if item.code == "no_active_warning_status":
         return "status"
+    if item.code == "shelter_may_open":
+        return "shelter"
+    if item.code == "tc3_still_in_force":
+        return "caution"
     if item.code in DONT_CODES or item.tier in {Severity.DANGER, Severity.WARNING}:
         return "dont"
     return "do"
+
+
+def _warning_types(state: WeatherState) -> set[str]:
+    return {item.warning_type for item in state.warnings.values() if item.warning_type}
+
+
+def _shelter_active(weather: WeatherState | None) -> bool:
+    if weather is None:
+        return False
+    codes = _warning_codes(weather)
+    types = _warning_types(weather)
+    return bool(codes.intersection({"WRAINR", "WRAINB", "WL"}) or types.intersection(TC8_PLUS_TYPES))
+
+
+def _time_note(weather: WeatherState | None, lang: str = "zh") -> str:
+    if weather is None or weather.observed_at is None:
+        return ""
+    dt = weather.observed_at
+    bits = []
+    if lang == "en":
+        if dt.weekday() == 6:
+            bits.append("Today is Sunday.")
+        if dt.hour < 6:
+            bits.append("It is late at night.")
+        return " ".join(bits)
+    if dt.weekday() == 6:
+        bits.append("今日是星期日。")
+    if dt.hour < 6:
+        bits.append("现时为深夜。")
+    return "".join(bits)
 
 
 def _contact_from_spec(spec: ContactSpec) -> ContactInfo:
@@ -93,8 +136,8 @@ def _address_unconfirmed(personal: PersonalContext | None) -> bool:
     return count != 1
 
 
-def _human_not_considered(key: str) -> str:
-    labels = {
+def _human_not_considered(key: str, lang: str = "zh") -> str:
+    zh = {
         "weather_snapshot": "没有天气快照",
         "uv_index": "紫外线指数未知",
         "is_domestic_helper": "未询问是否外佣",
@@ -102,14 +145,23 @@ def _human_not_considered(key: str) -> str:
         "has_bedridden": "未询问家中是否有卧床者",
         "housing": "未询问住所类型",
     }
+    en = {
+        "weather_snapshot": "No weather snapshot",
+        "uv_index": "UV index unknown",
+        "is_domestic_helper": "Did not ask if domestic helper",
+        "has_pets": "Did not ask about pets",
+        "has_bedridden": "Did not ask about bedridden household members",
+        "housing": "Did not ask housing type",
+    }
+    labels = en if lang == "en" else zh
     if key in labels:
         return labels[key]
     if key.startswith("rainfall.main:"):
         place = key.split(":", 1)[1]
-        return f"{place}的雨量主站标记未知"
+        return f"Rainfall station flag unknown for {place}" if lang == "en" else f"{place}的雨量主站标记未知"
     if key.startswith("actionCode:CANCEL:"):
         code = key.split(":")[-1]
-        return f"{code}警告已取消，不计入生效警告"
+        return f"{code} cancelled, not counted as active" if lang == "en" else f"{code}警告已取消，不计入生效警告"
     return key
 
 
@@ -153,8 +205,8 @@ def _block_outcomes(
         ),
         BlockOutcome(
             block=Block.SHELTER,
-            rendered=False,
-            omitted_reason=SHELTER_OMIT_REASON,
+            rendered=_shelter_active(weather),
+            omitted_reason=None if _shelter_active(weather) else SHELTER_OMIT_REASON,
         ),
         BlockOutcome(
             block=Block.HOUSING_RISK,
@@ -220,16 +272,32 @@ def pack_response(
             weather=weather,
         ),
         contact=compute_contact(weather),
-        not_considered=[_human_not_considered(item) for item in not_considered],
+        not_considered=[
+            _human_not_considered(item, personal.language if personal else "zh")
+            for item in not_considered
+        ],
         stale_as_of=stale,
+        location_line=(
+            f"{personal.district} · {personal.request_address}"
+            if personal and (personal.district or personal.request_address)
+            else None
+        ),
+        language=personal.language if personal else "zh",
+        needs_large_type=personal.needs_large_type if personal else False,
     )
 
 
-def _with_emergency(advice: list[AdviceItem], fired: list[str]) -> tuple[list[AdviceItem], list[str]]:
+def _with_emergency(
+    advice: list[AdviceItem], fired: list[str], *, lang: str = "zh"
+) -> tuple[list[AdviceItem], list[str]]:
     emergency = get_rule("emergency_999")
     sms = get_rule("emergency_sms_992")
     ask = get_rule("where_to_ask")
-    extra = [_advice_from_rule(emergency), _advice_from_rule(sms), _advice_from_rule(ask)]
+    extra = [
+        _advice_from_rule(emergency, lang=lang),
+        _advice_from_rule(sms, lang=lang),
+        _advice_from_rule(ask, lang=lang),
+    ]
     extra_ids = [emergency.id, sms.id, ask.id]
     return [*advice, *extra], [*fired, *extra_ids]
 
@@ -264,10 +332,11 @@ def evaluate(personal: PersonalContext, weather: WeatherState) -> RiskResponse:
     if not isinstance(personal, PersonalContext) or not isinstance(weather, WeatherState):
         raise TypeError("evaluate accepts PersonalContext and WeatherState only")
 
+    lang = personal.language
     place = to_hko_place(personal.district) if personal.district else None
     if personal.district and place is None:
         rule = get_rule("abstain_out_of_scope")
-        advice, fired = _with_emergency([], [rule.id])
+        advice, fired = _with_emergency([], [rule.id], lang=lang)
         return pack_response(
             abstained=True,
             abstain_reason="地址不在本卡覆盖的香港十八区范围内",
@@ -278,13 +347,15 @@ def evaluate(personal: PersonalContext, weather: WeatherState) -> RiskResponse:
         )
 
     codes = _warning_codes(weather)
+    types = _warning_types(weather)
+    t8plus = bool(types.intersection(TC8_PLUS_TYPES))
     fired: list[str] = []
     advice: list[AdviceItem] = []
     if not codes:
         status = get_rule("no_active_warning_status")
         fired.append(status.id)
-        advice.append(_advice_from_rule(status))
-        advice, fired = _with_emergency(advice, fired)
+        advice.append(_advice_from_rule(status, lang=lang))
+        advice, fired = _with_emergency(advice, fired, lang=lang)
         return pack_response(
             abstained=False,
             abstain_reason=None,
@@ -299,29 +370,51 @@ def evaluate(personal: PersonalContext, weather: WeatherState) -> RiskResponse:
         top = max(rain_present, key=RAIN_ORDER.index)
         rain_rule = get_rule("rainstorm_level")
         fired.append(rain_rule.id)
-        advice.append(_advice_from_rule(rain_rule, severity=RAIN_SEVERITY[top]))
+        advice.append(_advice_from_rule(rain_rule, severity=RAIN_SEVERITY[top], lang=lang))
 
-    if "WRAINB" in codes and personal.is_domestic_helper is True:
-        rule = get_rule("helper_black_rain")
+    if personal.is_domestic_helper is True and ("WRAINB" in codes or t8plus):
+        rule = get_rule("helper_black_rain" if "WRAINB" in codes else "helper_tc8plus")
         fired.append(rule.id)
-        advice.append(_advice_from_rule(rule))
+        advice.append(_advice_from_rule(rule, lang=lang))
 
-    if "WRAINB" in codes and personal.has_pets is True:
-        rule = get_rule("pets_black_rain")
+    if personal.has_pets is True and ("WRAINB" in codes or t8plus):
+        rule = get_rule("pets_black_rain" if "WRAINB" in codes else "pets_tc8plus")
         fired.append(rule.id)
-        advice.append(_advice_from_rule(rule))
+        advice.append(_advice_from_rule(rule, lang=lang))
 
     if "WRAINB" in codes and personal.has_bedridden is True:
         rule = get_rule("bedridden_black_rain")
         fired.append(rule.id)
-        advice.append(_advice_from_rule(rule))
+        advice.append(_advice_from_rule(rule, lang=lang))
 
     if "WL" in codes and personal.housing is Housing.ROOFTOP:
         rule = get_rule("rooftop_landslip")
         fired.append(rule.id)
-        advice.append(_advice_from_rule(rule))
+        advice.append(_advice_from_rule(rule, lang=lang))
 
-    advice, fired = _with_emergency(advice, fired)
+    if "TC10" in types or "TC9" in types:
+        rule = get_rule("tc10_in_force")
+        fired.append(rule.id)
+        advice.append(_advice_from_rule(rule, lang=lang))
+    elif types.intersection({"TC8NE", "TC8SE", "TC8NW", "TC8SW"}):
+        rule = get_rule("tc8_in_force")
+        fired.append(rule.id)
+        advice.append(_advice_from_rule(rule, lang=lang))
+    elif types.intersection({"TC3", "TC1"}):
+        rule = get_rule("tc3_still_in_force")
+        fired.append(rule.id)
+        advice.append(_advice_from_rule(rule, lang=lang))
+
+    if _shelter_active(weather):
+        rule = get_rule("shelter_may_open")
+        item = _advice_from_rule(rule, lang=lang)
+        note = _time_note(weather, lang=lang)
+        if note:
+            item = item.model_copy(update={"body": f"{item.body} {note}"})
+        fired.append(rule.id)
+        advice.append(item)
+
+    advice, fired = _with_emergency(advice, fired, lang=lang)
     return pack_response(
         abstained=False,
         abstain_reason=None,

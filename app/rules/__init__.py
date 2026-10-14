@@ -41,6 +41,8 @@ def _parse_rules(payload: dict) -> list[Rule]:
                 severity=Severity(raw["severity"]),
                 title=raw["title"],
                 body=raw["body"],
+                title_en=raw.get("title_en") or "",
+                body_en=raw.get("body_en") or "",
             )
         )
     return rules

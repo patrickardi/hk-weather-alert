@@ -343,3 +343,92 @@ cases:
       abstained: false
       contact_hours_contains: "24小时"
       contact_mode: had_round_the_clock
+
+  - id: wipha_t8_0020
+    description: 屯门湖山路 · 韦帕 T8 00:20 星期日深夜
+    personal:
+      request_address: "101 Wu Shan Road"
+      district: "屯門區"
+      latitude: 22.37693
+      longitude: 113.96868
+      geocode_score: 88.75
+      geocode_candidate_count: 1
+      language: zh
+      needs_large_type: true
+    weather:
+      observed_at: "2025-07-20T00:20:00+08:00"
+      warnings:
+        WTCSGNL:
+          warning_key: WTCSGNL
+          code: WTCSGNL
+          name: Tropical Cyclone Warning Signal
+          warning_type: TC8NE
+          action_code: ISSUE
+          issue_time: "2025-07-20T00:20:00+08:00"
+          update_time: "2025-07-20T00:20:00+08:00"
+    expect:
+      abstained: false
+      contact_hours_contains: "24小时"
+      contact_mode: had_round_the_clock
+      fired_rules_contains:
+        - tc8_in_force
+        - shelter_may_open
+
+  - id: wipha_t10_0920
+    description: 元朗朗屏邨 · 韦帕 T10 09:20 · 严重程度到顶
+    personal:
+      request_address: "Long Ping Estate, Yuen Long"
+      district: "元朗區"
+      latitude: 22.4486
+      longitude: 114.0253
+      geocode_score: 92.0
+      geocode_candidate_count: 1
+      is_domestic_helper: true
+      has_pets: true
+      language: en
+    weather:
+      observed_at: "2025-07-20T09:20:00+08:00"
+      warnings:
+        WTCSGNL:
+          warning_key: WTCSGNL
+          code: WTCSGNL
+          name: Tropical Cyclone Warning Signal
+          warning_type: TC10
+          action_code: ISSUE
+          issue_time: "2025-07-20T09:20:00+08:00"
+          update_time: "2025-07-20T09:20:00+08:00"
+    expect:
+      abstained: false
+      contact_hours_contains: "24小时"
+      contact_mode: had_round_the_clock
+      fired_rules_contains:
+        - tc10_in_force
+        - shelter_may_open
+        - helper_tc8plus
+        - pets_tc8plus
+
+  - id: wipha_t3_1940
+    description: 湾仔 · 韦帕 T3 19:40 · 热线改回 1823
+    personal:
+      request_address: "258 Queen's Road East, Wan Chai"
+      district: "灣仔區"
+      latitude: 22.2765
+      longitude: 114.1718
+      geocode_score: 85.0
+      geocode_candidate_count: 1
+    weather:
+      observed_at: "2025-07-20T19:40:00+08:00"
+      warnings:
+        WTCSGNL:
+          warning_key: WTCSGNL
+          code: WTCSGNL
+          name: Tropical Cyclone Warning Signal
+          warning_type: TC3
+          action_code: ISSUE
+          issue_time: "2025-07-20T19:40:00+08:00"
+          update_time: "2025-07-20T19:40:00+08:00"
+    expect:
+      abstained: false
+      contact_mode: gov_1823
+      fired_rules_contains:
+        - tc3_still_in_force
