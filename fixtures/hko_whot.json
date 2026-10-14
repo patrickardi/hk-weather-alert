@@ -1,0 +1,34 @@
+{
+  "source_label": "Home Affairs Department",
+  "source_url": "https://www.info.gov.hk/gia/general/202609/30/P2026093000535.htm",
+  "retrieved_on": "2026-09-30",
+  "issued_at": "2026-09-30T17:00:00+08:00",
+  "opening_rule_quote": "The temporary heat shelters will remain open for people to take refuge from the heat when the Very Hot Weather Warning is in force. From 10.30pm to 8am the next day, the temporary heat shelters will also provide bedding and a sleeping place for people in need. The shelters are manned by duty attendants.",
+  "hotline_quote": "For further information, please call the department's hotline before midnight on 2572 8427.",
+  "hotline": "2572 8427",
+  "hotline_hours": "before midnight",
+  "daytime_halls_quote": "In addition to the above heat shelters, a number of community halls/community centres can also be used for taking refuge from the heat during their operating hours.",
+  "daytime_halls_url": "https://www.had.gov.hk/file_manager/en/documents/public_services/emergency_services/List_CH_CC_Day_E.pdf",
+  
+  "shelters": [
+    {"district_en": "Central and Western", "district_zh": "中西區", "name": "Sai Ying Pun Community Complex Community Hall", "address": "3/F, Sai Ying Pun Community Complex, 2 High Street, Sai Ying Pun"},
+    {"district_en": "Eastern", "district_zh": "東區", "name": "Causeway Bay Community Centre", "address": "3/F, 7 Fook Yum Road, Causeway Bay"},
+    {"district_en": "Southern", "district_zh": "南區", "name": "Lei Tung Community Hall", "address": "Lei Tung Estate, Ap Lei Chau"},
+    {"district_en": "Wan Chai", "district_zh": "灣仔區", "name": "Wan Chai Activities Centre", "address": "LG/F, Wan Chai Market, 258 Queen's Road East, Wan Chai"},
+    {"district_en": "Kowloon City", "district_zh": "九龍城區", "name": "Hung Hom Community Hall", "address": "1/F, Kowloon City Government Offices, 42 Bailey Street, Hung Hom"},
+    {"district_en": "Kwun Tong", "district_zh": "觀塘區", "name": "Lam Tin (West) Estate Community Centre", "address": "71 Kai Tin Road, Lam Tin"},
+    {"district_en": "Sham Shui Po", "district_zh": "深水埗區", "name": "Shek Kip Mei Community Hall", "address": "G/F, Block 42, Shek Kip Mei Estate"},
+    {"district_en": "Wong Tai Sin", "district_zh": "黃大仙區", "name": "Tsz Wan Shan (South) Estate Community Centre", "address": "45 Wan Wah Street, Tsz Wan Shan"},
+    {"district_en": "Yau Tsim Mong", "district_zh": "油尖旺區", "name": "Henry G Leong Yaumatei Community Centre", "address": "60 Public Square Street, Yau Ma Tei"},
+    {"district_en": "Islands", "district_zh": "離島區", "name": "Tung Chung Community Hall", "address": "G/F, Tung Chung Municipal Services Building, 39 Man Tung Road, Tung Chung"},
+    {"district_en": "Kwai Tsing", "district_zh": "葵青區", "name": "Kwai Shing Community Hall", "address": "Podium, Block 6, Kwai Shing West Estate, Kwai Chung"},
+    {"district_en": "North", "district_zh": "北區", "name": "Cheung Wah Community Hall", "address": "Cheung Wah Estate, Fanling"},
+    {"district_en": "Sai Kung", "district_zh": "西貢區", "name": "Hang Hau Community Hall", "address": "G/F, Sai Kung Tseung Kwan O Government Complex, 38 Pui Shing Road, Hang Hau, Tseung Kwan O"},
+    {"district_en": "Sha Tin", "district_zh": "沙田區", "name": "Lung Hang Estate Community Centre", "address": "Lung Hang Estate, Sha Tin"},
+    {"district_en": "Tai Po", "district_zh": "大埔區", "name": "Tai Po Community Centre", "address": "2 Heung Sze Wui Street, Tai Po"},
+    {"district_en": "Tsuen Wan", "district_zh": "荃灣區", "name": "Lei Muk Shue Community Hall", "address": "G/F, Hong Shue House, Lei Muk Shue Estate, Tsuen Wan"},
+    {"district_en": "Tuen Mun", "district_zh": "屯門區", "name": "Wu Shan Road Community Hall", "address": "101 Wu Shan Road, Tuen Mun"},
+    {"district_en": "Yuen Long", "district_zh": "元朗區", "name": "Long Ping Community Hall", "address": "Long Ping Estate, Yuen Long"},
+    {"district_en": "Yuen Long", "district_zh": "元朗區", "name": "Tin Yiu Community Centre", "address": "Tin Yiu Estate, Tin Shui Wai"}
+  ]
+}
