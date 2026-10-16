@@ -28,22 +28,7 @@ hard-coded. See §5.
 
 ### 1.2 The Government's own address service does not recognise its own shelter
 
-`101 Wu Shan Road, Tuen Mun` is **Wu Shan Road Community Hall**, one of 19
-temporary heat shelters (info.gov.hk GIA, 29 and 30 Sep 2026; it is the
-temporary replacement for Butterfly Bay Community Centre per the footnote on
-had.gov.hk).
-
-Fed to the Address Lookup Service, it returns:
-
-```
-BuildingName : CASTLE PEAK WHOLESALE FISH MARKET / 青山魚類批發市場
-Score        : 88.75
-candidates   : 1
-```
-
-➡️ High confidence, single candidate, wrong answer, and no second option to
-prompt doubt. See `tests/` — this is a permanent regression case, not a bug to
-be "fixed" away.
+Add a sources footnote at the end of the paragraph (the four URLs from §5, the ALS Data Dictionary, and the verbatim "Score … for results ordering and reference only"). Replace "See tests/" with the concrete case ID(s). → Add the b=1 probe as a TODO; it is diagnostic only — no rule reads its result (see §5.1).
 
 ### 1.3 "Typhoon shelter" is not a shelter for residents
 
@@ -132,6 +117,11 @@ of water. The card must never print the words "typhoon shelter" as advice.
 - [ ] **Cross-check warnsum against rhrread** (§6.3). `{}` currently cannot be
       distinguished from a broken upstream.
 - [ ] **Delete every `isinstance(result, dict)` branch in the tests** (§8.1).
+- [ ] ActiveWarning.warning_type: str | None (WHOT has no sub-type; the current model cannot accept it)
+- [ ] WHOT branch in scene_response
+- [ ] Two contacts modes: had_round_the_clock / had_before_midnight; midnight prints as 00:00, Shelter lookup by district must return          multiple rows (Yuen Long has two)
+- [ ] Render-layer assertion: none of the three cards may contain "{{", TODO or SAMPLE
+- [ ] t8_0020 vs §5.1 Resolved: SHELTER is district-level (§5.1 rewritten). wipha_t8_0020 expectation stands. New cases: `als_zero_candidates`, `als_multi_district`, `als_district_conflict.` New tests: `test_no_rule_reads_building_level_fields`.
 
 ---
 
