@@ -384,7 +384,7 @@ warnsum == {} AND rhrread.warningMessage is non-empty  → abstained=True
 warnsum non-empty AND rhrread.warningMessage == ""     → abstained=True
 ```
 An empty `warnsum` body is indistinguishable from a broken upstream.
-The only available check is agreement between two sources. Needs a golden case.
+The only available check is agreement between two sources.
 
 ---
 
@@ -515,5 +515,4 @@ All quotes in this repo carry `retrieved_on`. The sources currently cited:
 
 Reference event for all scenario work: **Typhoon Wipha, Sunday 20 July 2025.**
 T8 00:20 → T9 07:20 → T10 09:20 (≈7 hours) → T8 16:10 → T3 19:40. Red rainstorm warning 15:10–18:10.
-About 214 people went to government shelters.
-It was a Sunday (the rest day).
+About 214 people went to government shelters. It was a Sunday (the rest day).
