@@ -37,8 +37,8 @@ moorings for **vessels**; the Marine Department monitors mooring space.
 The place for **people** is a *temporary shelter* / *temporary heat shelter*,
 opened "at the discretion of District Officer(s)" (had.gov.hk).
 
-➡️ Two near-identical English names, opposite meanings, one of them is a body
-of water. The card must never print the words "typhoon shelter" as advice.
+➡️ Two near-identical English names, opposite meanings, one of them is a body of water.
+The card must never print the words "typhoon shelter" as advice.
 
 ---
 
@@ -70,8 +70,7 @@ of water. The card must never print the words "typhoon shelter" as advice.
 - `warningMessage: list[str] | Literal[""]` and `uvindex: UvIndexObject | Literal[""]`
   encode the fact that `""` means *no data*, not zero.
 - `ActiveWarning` carries both `warning_key` and `code` (live data has `key=WFIRE`, `code=WFIREY`).
-- `looks_like_json()` checks content-type **and** first byte — catches
-  HTTP 200 with an HTML body.
+- `looks_like_json()` checks content-type **and** first byte — catches HTTP 200 with an HTML body.
 - `stale_as_of` uses `min()`. The card prints the **oldest** source time.
 - `test_golden_cases` matches the abstained reason.
 - `Provenance` has exactly two members and **neither of them is "generated"**.
@@ -104,10 +103,9 @@ of water. The card must never print the words "typhoon shelter" as advice.
       written, and §1.2 stays an anecdote instead of a test.
 - [ ] **Add `retrieved_on` to `RuleSource` and `AdviceItem`**, required when
       `safety_critical`. This is what makes the SPF-15-vs-SPF-30 class of
-      error visible in review, and it is the only way to express "both quotes
-      are official, one is newer".
-- [ ] **Replace the four assume-safe defaults** with tri-state
-      (§5.2). `has_bedridden: bool = False` currently means "nobody asked, so
+      error visible in review, and it is the only way to express "both quotes are official, one is newer".
+- [ ] **Replace the four assume-safe defaults** with tri-state (§5.2).
+      `has_bedridden: bool = False` currently means "nobody asked, so
       assume nobody is bedridden".
 - [ ] **Filter `actionCode == "CANCEL"`** in the adapter, and record the
       filtering. A cancellation is a published event — we have seen
@@ -119,7 +117,8 @@ of water. The card must never print the words "typhoon shelter" as advice.
 - [ ] **Delete every `isinstance(result, dict)` branch in the tests** (§8.1).
 - [ ] ActiveWarning.warning_type: str | None (WHOT has no sub-type; the current model cannot accept it)
 - [ ] WHOT branch in scene_response
-- [ ] Two contacts modes: had_round_the_clock / had_before_midnight; midnight prints as 00:00, Shelter lookup by district must return          multiple rows (Yuen Long has two)
+- [ ] Two contacts modes: had_round_the_clock / had_before_midnight; midnight prints as 00:00,
+      Shelter lookup by district must return          multiple rows (Yuen Long has two)
 - [ ] Render-layer assertion: none of the three cards may contain "{{", TODO or SAMPLE
 - [ ] t8_0020 vs §5.1 Resolved: SHELTER is district-level (§5.1 rewritten). wipha_t8_0020 expectation stands. New cases: `als_zero_candidates`, `als_multi_district`, `als_district_conflict.` New tests: `test_no_rule_reads_building_level_fields`.
 
@@ -135,6 +134,8 @@ of water. The card must never print the words "typhoon shelter" as advice.
 | Shelter opening status | Home Affairs Department | had.gov.hk + GIA | 🔴 No |
 | Daytime-only refuge halls (a **second, different** list) | HAD | `List_CH_CC_Day_E.pdf` | 🔴 No |
 | Bahasa Indonesia version of **any of above** | — | 🔴 Not published | 🔴 No |
+| Bahasa Indonesia, machine-readable (API `lang=` ∈ {en,tc,sc}; GIA; HAD lists) | — | 🔴 Not published |
+| Bahasa Indonesia, human-facing (HKO personalised weather website, 8 EM languages, since 2021-05; 6 translated warning leaflets) | HKO | ✅ exists — but templated, not the specific bulletin; not a data source for this card |
 
 On 29 Sep 2026 the GIA page carried, on the same day, nine Labour Department
 notifications about one Heat Stress at Work Warning **and** a separate HKO
@@ -157,38 +158,118 @@ and always carries `retrieved_on`.**
 
 ### 5.1 Block-level outcomes, not one boolean
 
-`abstained=True` means **the whole card is unusable**: upstream was not JSON,
-the district is outside Hong Kong, or two sources contradict each other.
+`abstained=True` means **the whole card is unusable**. Exactly two things cause it:
+1. The `warnsum` body is not JSON, or not the shape we expect. We then do not know
+   which warnings are active, so nothing downstream can be trusted. `lang=id` returning an HTTP-200 HTML page is this case.
+2. Two official feeds disagree about the *current* warning state.
 
-Address-level uncertainty suppresses **blocks**:
+Everything else — an address we cannot place, a `rhrread` feed that is down, a personal-context field the user never mentioned
+— withholds **blocks**, and the card prints why, in the block's place.
+
+Every block declares one **scope**. The scope is the only thing that can withhold it:
 
 ```python
 class Block(str, Enum):
-    ACTIVE_WARNINGS   = "active_warnings"     # territory-wide
-    LOCAL_OBSERVATION = "local_observation"   # district-level
-    SHELTER           = "shelter"             # address-level
-    HOUSING_RISK      = "housing_risk"        # address-level
-    WORK              = "work"
-    CONTACT           = "contact"
+    ACTIVE_WARNINGS   = "active_warnings"     # territory: reads warnsum
+    LOCAL_OBSERVATION = "local_observation"   # district:  reads rhrread for AddressResolution.district
+    SHELTER           = "shelter"             # district:  reads the HAD list for AddressResolution.district
+    HOUSING_RISK      = "housing_risk"        # personal:  reads PersonalContext.housing
+    WORK              = "work"                # territory: reads ActiveWarning.code            ← verify
+    CONTACT           = "contact"             # territory: reads ActiveWarning.code → contacts mode
+
+class OmitReason(str, Enum):
+    ADDRESS_NOT_FOUND         = "address_not_found"          # ALS: 0 candidates
+    ADDRESS_MULTI_DISTRICT    = "address_multi_district"     # ALS: candidates span ≥2 DcDistrict
+    ADDRESS_DISTRICT_CONFLICT = "address_district_conflict"  # typed district ≠ ALS DcDistrict
+    NOT_STATED                = "not_stated"                 # the PersonalContext field is None
+    SOURCE_UNREADABLE         = "source_unreadable"          # this block's own feed was not parseable
+    NOT_TRIGGERED             = "not_triggered"              # e.g. no shelter-opening warning in force
 
 class BlockOutcome(BaseModel):
     block: Block
     rendered: bool
-    omitted_reason: str | None = None   # required when rendered is False
+    omitted_reason: OmitReason | None = None
+
+    @model_validator(mode="after")
+    def _reason_iff_omitted(self) -> "BlockOutcome":
+        if not self.rendered and self.omitted_reason is None:
+            raise ValueError(f"{self.block.value}: omitted without a reason")
+        if self.rendered and self.omitted_reason is not None:
+            raise ValueError(f"{self.block.value}: rendered but carries an omitted_reason")
+        return self
 ```
 
-For the 101 Wu Shan Road case this gives the right answer rather than a convenient one:
+There is no `address` scope. No block reads `top_building_name`, coordinates, or ALS `BuildingName`.
+§1.2 shows: building-level identity from ALS cannot be trusted (one candidate, Score 88.75, wrong building).
+District-level identity survives that failure — the wrong building is still in the right district.
+`test_no_rule_reads_building_level_fields` greps `rules/*.yaml` for those three names and expects zero hits.
 
-| Block | Outcome |
-|---|---|
-| ACTIVE_WARNINGS | ✅ rendered — territory-wide, address irrelevant |
-| LOCAL_OBSERVATION | ✅ rendered — the **district** (Tuen Mun) is correct |
-| SHELTER | 🔴 omitted — "we cannot confirm your address; this would have sent you to wrong locations" |
-| HOUSING_RISK | 🔴 omitted — same reason |
-| CONTACT | ✅ rendered — address-independent |
+Each `OmitReason` maps to one fixed sentence in the renderer (`provenance = template`).
+Tests assert on the enum member, never on the sentence.
+
+#### How `district` is resolved
+
+Query ALS with `t=80&n=20` — the widest tolerance; the default `t=35` can hide candidates. Collect the distinct `EngPremisesAddress.EngDistrict.DcDistrict` values across *all* returned candidates.
+
+| ALS result | `district` | District-scoped blocks |
+|---|---|---|
+| ≥1 candidates, one `DcDistrict` | that district | rendered |
+| 0 candidates | `None` | withheld — `ADDRESS_NOT_FOUND` |
+| ≥2 distinct `DcDistrict` | `None` | withheld — `ADDRESS_MULTI_DISTRICT` |
+| user typed a district ≠ ALS `DcDistrict` | `None` | withheld — `ADDRESS_DISTRICT_CONFLICT` |
+
+`None` never degrades to "all of Hong Kong" or to whatever the user typed.
+`geocode_candidate_count`, `geocode_candidate_count_strict` (the `b=1` probe)
+and `top_building_name` stay on `AddressResolution` as **diagnostics only**.
+
+#### Worked example — 101 Wu Shan Road, Tuen Mun, under Wipha No. 8 NE (2025-07-20 00:20 HKT)
+
+Golden case `tests/cases/wipha_t8_0020.yaml`. Inputs:
+
+| Source | Fixture | Says |
+|---|---|---|
+| `warnsum` @ 00:20 | `fixtures/warnsum_202507200020.json` | `WTCSGNL` → `code: TC8NE`, `actionCode: ISSUE` |
+| ALS, default `t` | `fixtures/als/wu_shan_road_default.json` | 1 candidate, Score 88.75, `BuildingName` = a fish market (wrong), `DcDistrict` = TUEN MUN DISTRICT ← verify |
+| ALS, `t=80&n=20` | `fixtures/als/wu_shan_road_wide.json` | *n* candidates, all `DcDistrict` = TUEN MUN DISTRICT ← verify |
+| HAD shelter list | `fixtures/had_shelters_<date>.json` | rows where district = Tuen Mun |
+| `PersonalContext` | inline in the case file | `housing: None`, `has_bedridden: None`, `is_domestic_helper: None` |
+
+Outcomes:
+
+| Block | Outcome | Why |
+|---|---|---|
+| ACTIVE_WARNINGS | ✅ rendered | territory-wide; address irrelevant |
+| LOCAL_OBSERVATION | ✅ rendered | `district` = Tuen Mun |
+| SHELTER | ✅ rendered | `district` = Tuen Mun; `TC8NE` trips `shelter_may_open`; every HAD row for Tuen Mun, `quote_only`, with `retrieved_on` |
+| HOUSING_RISK | ⚪ withheld — `NOT_STATED` | user never said what they live in; card prints "Housing type not stated — housing risk not assessed." |
+| WORK | ✅ rendered | `TC8NE` branch ← verify |
+| CONTACT | ✅ rendered | `TC8NE` selects the contacts mode ← verify which |
+
+What SHELTER does **not** print, by construction: a distance, the word "nearest", directions, a map pin, or the fish market's name.
+Each would require trusting the building-level match. The previous version of this section withheld SHELTER here.
+That was the right instinct applied one level too high —
+it threw away the district, which ALS got right, to avoid the building, which ALS got wrong.
+
+The case asserts:
+`abstained == false`; `blocks.shelter.rendered == true`;
+`len(blocks.shelter.rows) == <Tuen Mun row count in the HAD fixture>`;
+`blocks.housing_risk.omitted_reason == NOT_STATED`;
+`address.top_building_name not in card.text`.
+
+#### Cases that withhold district-scoped blocks
+
+| Case | Query | `omitted_reason` on SHELTER and LOCAL_OBSERVATION |
+|---|---|---|
+| `als_zero_candidates` | `999 Nowhere Street, Hong Kong` | `ADDRESS_NOT_FOUND` |
+| `als_multi_district` | `Castle Peak Road` — no number; the road crosses Sham Shui Po, Kwai Tsing, Tsuen Wan, Tuen Mun and Yuen Long. Confirm the spread with the probe before freezing the fixture. | `ADDRESS_MULTI_DISTRICT` |
+| `als_district_conflict` | `101 Wu Shan Road, Yuen Long` | `ADDRESS_DISTRICT_CONFLICT` |
+
+In all three, `abstained == false`, and ACTIVE_WARNINGS, WORK and CONTACT still render — none of them reads `district`.
 
 ➡️ A card that is 70% useful beats a blank card in a rainstorm.
 Suppress the blocks that are wrong, not the ones that happen to sit next to them.
+The big-print card may shorten a block's text, but `BlockOutcome.rendered` must be identical between the big-print and full renders —
+`test_bigprint_and_full_share_block_flags`. Truncation is layout, never a rule.
 
 ### 5.2 Nothing may default to safe
 
@@ -203,10 +284,17 @@ housing:            Housing | None = None
 It must never render as though the answer were "no".
 
 This is the same bug as `""`-treated-as-`0`, which we already fixed in wire.
-Defaults reintroduce it one layer down. Also: `bool` cannot represent "not sure", which makes the GenAI abstention contract (§7) unrepresentable.
+Defaults reintroduce it one layer down. Also: `bool` cannot represent "not sure",
+which makes the GenAI abstention contract (§7) unrepresentable.
 
 `housing` must be an Enum — a typo like `"roof_top"` currently downgrades a
 rooftop-hut resident to a generic card in silence.
+
+A `None` here is what withholds a personal-scoped block: `HOUSING_RISK` with
+`omitted_reason = NOT_STATED` (§5.1). Where a personal field only *refines* a
+block keyed on something else — `is_domestic_helper` inside WORK — `None` prints
+a "not stated" template line. It never selects the general branch as though the
+answer were "no".
 
 ### 5.3 Abstain is never blank
 
@@ -218,10 +306,24 @@ FALLBACK_CODES = {"emergency_999", "emergency_sms_992", "where_to_ask"}
 # abstained=False → abstain_reason must be None
 ```
 
+The block-level analogue is the `BlockOutcome` validator in §5.1:
+`rendered=False` without an `omitted_reason` fails validation, and the reason's
+template sentence is printed where the block would have been. There is no state
+in which something is missing from the card and the card does not say so.
+
 ### 5.4 Severity has an explicit rank
 
 `Severity` is a `str` Enum, so the default comparison is alphabetical, which
-ranks `"warning"` above `"danger"`. Add `.rank` on the enum and use it everywhere. Do not keep a second ranking table in the tests.
+ranks `"warning"` above `"danger"`. Add `.rank` on the enum and use it everywhere.
+Do not keep a second ranking table in the tests.
+
+```python
+class Severity(str, Enum):
+    ...
+    @property
+    def rank(self) -> int:
+        return _SEVERITY_RANK[self]   # the only ranking table in the codebase
+```
 
 ---
 
@@ -238,6 +340,7 @@ Every row needs a source and a retrieval date. Two rows are unresolved.
 | T8+ / landslip / red or black rain | 2572 8427 | ✅ round-the-clock | hko.gov.hk advisory page |
 | HAD general | 2835 2500 | office hours, **caller ID withheld** | had.gov.hk |
 | ⚠️ HAD "Emergency Hotline" per Security Bureau | **2835 1473** | not stated | sb.gov.hk (2019 edition) |
+| Foreign domestic helpers (Labour Dept, via 1823, free interpretation) | 2157 9537 | 24h | fdh.labour.gov.hk/en/contact_us.html, retrieved <date> |
 
 ⚠️ **Open question 1:** 2572 8427 or 2835 1473? Both are currently published
 as HAD's emergency line. Must be confirmed by phone.
@@ -272,7 +375,7 @@ always
 ### 6.2 Never print "typhoon shelter"
 
 See §1.3. Whitelist the phrase out of all card copy and add a test for it.
-Keywords of "shelter" in the API open to the public is "Community Service Hall".
+Official keywords are Community Hall / Community Centre. The API carries no shelter data at all (§4).
 
 ### 6.3 Sources must reconcile
 
@@ -326,6 +429,7 @@ The suite currently accepts either dicts or models throughout
 That is why the `schemas.py` validators are not protecting anything: there is always a path around them.
 
 Fix in this order:
+
 1. `tests/helpers.run_evaluate` validates its dict arguments into
    `PersonalContext` / `WeatherState` and returns a `RiskResponse`.
    YAML fixtures stay as dicts; that is fine.
@@ -368,9 +472,10 @@ This is the only real defence against paraphrase drift (what `retrieved_on` is f
 - [ ] ALS returns 2+ candidates → ambiguous, blocks omitted with reason
 - [ ] `101 Wu Shan Road` → rain advice **rendered**, shelter block **omitted**
 - [ ] Very Hot Weather only → CONTACT says "until midnight"
-- [ ] T8 → CONTACT says round-the-clock
 - [ ] `housing=None` → card states it did not consider housing
 - [ ] Card copy contains the phrase "typhoon shelter" → fail
+- [ ] VHWW → until midnight：vhww_fdh_central_1400
+- [ ] T8 → round-the-clock：wipha_t8_0020
 
 ### 8.7 Move coverage assertions out of the parametrised method
 
@@ -385,6 +490,8 @@ python -m app.probe            # refresh live fixtures
 python -m app.probe --als      # three new ALS shapes, see §3
 python -m pytest               # must be green
 python -m app.render           # renders the card, offline, no GenAI
+python -m app.probe --at 202609271400      # backfill from data.gov.hk historical archive
+python -m pytest tests/test_wipha_cards.py # three scenario cards
 ```
 
 ---
@@ -401,6 +508,10 @@ All quotes in this repo carry `retrieved_on`. The sources currently cited:
 | info.gov.hk GIA heat shelter notices | 2026-09-29, 2026-09-30 |
 | sb.gov.hk *Simple Guidelines in the Event of Major Mishaps* | 2026-09-28 (document dated Sep 2019) |
 | HKO Open Data API Documentation | 2026-09-28 (samples labelled NOT real data) |
+| HAD_Temporary_Shelters_List_EN.pdf, Updated July 2026 | 2026-10-07 |
+| ALS Data Dictionary v3.2 | 2026-10-xx |
+| fdh.labour.gov.hk contact page | 2026-10-xx |
+| data.gov.hk API spec | 2026-10-14 |
 
 Reference event for all scenario work: **Typhoon Wipha, Sunday 20 July 2025.**
 T8 00:20 → T9 07:20 → T10 09:20 (≈7 hours) → T8 16:10 → T3 19:40. Red rainstorm warning 15:10–18:10.
