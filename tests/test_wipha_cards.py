@@ -64,3 +64,43 @@ def test_wipha_three_cards_html_differ():
     htmls = [render_html(scene_response(scene), diff_label=scene["diff_label"]) for scene in SCENES]
     assert htmls[0] != htmls[1] != htmls[2]
     assert htmls[0] != htmls[2]
+
+
+def test_fdh_heat_card_english_outdoor_before_midnight():
+    scene = _by_id("vhww_fdh_1400")
+    result = scene_response(scene)
+    html = render_html(result, diff_label=scene["diff_label"])
+
+    # 身份与 UI：英文、标准字号、不弃答
+    assert result.abstained is False
+    assert result.language == "en"
+    assert result.needs_large_type is False
+    assert 'class="peak-warning large"' not in html
+
+    # 核心：同一号码，时段切换为 before midnight，卡上不得出现 24 小时
+    assert result.contact.had_hotline == "2572 8427"
+    assert result.contact.mode == "had_before_midnight"
+    assert "before midnight" in html
+    assert "round-the-clock" not in html and "24小时" not in html and "24-hour" not in html.split("2157 9537")[0]
+
+    # 规则：酷热规则触发，台风规则不触发
+    for code in ("vhww_in_force", "heat_outdoor_precautions", "heat_shelter_open", "fdh_support_line"):
+        assert code in result.fired_rules
+    assert "tc8_in_force" not in result.fired_rules
+    assert "shelter_may_open" not in result.fired_rules
+
+    assert "BEWARE OF HEAT STROKE" in html
+    assert "MORNING OR LATE AFTERNOON" in html
+    assert "Sai Ying Pun Community Complex Community Hall" in html
+    assert "2 High Street" in html
+    assert "2157 9537" in html                      # 外佣专线
+    assert "999" in html
+
+    assert "6:45" in html
+    assert "Sunday" in html
+    
+    assert "P2026092700144" in html
+    assert "P2026093000535" in html
+    assert "domestic_helper" not in result.not_considered
+
+    assert "{{" not in html and "TODO" not in html and "SAMPLE" not in html

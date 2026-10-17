@@ -5,6 +5,25 @@ from app.schemas import ActiveWarning, PersonalContext, WeatherState
 
 SCENES = (
     {
+        "id": "vhww_fdh_1400",
+        "signal": "WHOT",
+        "when": "2026-09-27T14:00:00+08:00",
+        "issue_time": "2026-09-27T06:45:00+08:00",   # 与 when 不同，active_warning 块应显示 06:45
+        "diff_label": "外傭 · English · 中環 · 酷熱警告 · 星期日休息日 14:00",
+        "filename": "vhww_fdh_1400.png",
+        "personal": PersonalContext(
+            request_address="1 Queen's Road Central",
+            district="中西區",
+            latitude=22.2805,
+            longitude=114.1594,
+            geocode_score=90.0,
+            geocode_candidate_count=1,
+            language="en",
+            needs_large_type=False,
+            is_domestic_helper=True,
+        ),
+    },
+    {
         "id": "t8_0020",
         "signal": "TC8NE",
         "when": "2025-07-20T00:20:00+08:00",
@@ -79,3 +98,16 @@ def _weather(signal: str, when: str) -> WeatherState:
 
 def scene_response(scene: dict):
     return evaluate(scene["personal"], _weather(scene["signal"], scene["when"]))
+
+
+def _weather_for(scene) -> WeatherState:
+    when = scene["when"]
+    issue = scene.get("issue_time", when)
+    if scene["signal"] == "WHOT":
+        w = Warning(warning_key="WHOT", code="WHOT", name="Very Hot Weather Warning",
+                    warning_type=None, action_code="ISSUE", issue_time=issue, update_time=issue)
+        return WeatherState(observed_at=when, warnings={"WHOT": w})
+    # 原有 TC 分支
+    w = Warning(warning_key="WTCSGNL", code="WTCSGNL", name="Tropical Cyclone Warning Signal",
+                warning_type=scene["signal"], action_code="ISSUE", issue_time=issue, update_time=issue)
+    return WeatherState(observed_at=when, warnings={"WTCSGNL": w})
