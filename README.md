@@ -1,4 +1,4 @@
-# HK Extreme-Weather Personal Risk Card
+# Weather Emergency Advice Card
 
 A one-page, forwardable emergency card for individuals who need official Hong Kong weather guidance and cannot get it from the channels, in a clear, accurate and personal form they can act on. Rules decide. GenAI filters and interprets the information but never decides.
 
@@ -9,7 +9,7 @@ A one-page, forwardable emergency card for individuals who need official Hong Ko
 Three findings from reading the official sources. All three are verbatim, all
 three are dated, none are invented.
 
-### 1.1 Four current official documents disagree about which number to call
+### 1.1 Four currently published official documents disagree about which number to call
 
 | Number | Source | What it says | Hours |
 |---|---|---|---|
@@ -28,12 +28,13 @@ hard-coded. See §5.
 
 ### 1.2 The Government's own address service does not recognise its own shelter
 
-`101 Wu Shan Road, Tuen Mun` is **Wu Shan Road Community Hall**, one of 19
-temporary heat shelters (info.gov.hk GIA, 29 and 30 Sep 2026; it is the
-temporary replacement for Butterfly Bay Community Centre per the footnote on
-had.gov.hk).
+HAD's published heat-shelter list names **Wu Shan Road Community Hall** at
+`101 Wu Shan Road, Tuen Mun` (info.gov.hk GIA, 29 and 30 Sep 2026; temporary
+replacement for Butterfly Bay Community Centre per the footnote on had.gov.hk).
 
-Fed to the Address Lookup Service, it returns:
+Fed to the Address Lookup Service with the **default** score tolerance
+`t` (range 0–80, default 35; ALS Data Dictionary v3.2, July 2024, §1.1.1),
+the lookup returns **one** candidate:
 
 ```
 BuildingName : CASTLE PEAK WHOLESALE FISH MARKET / 青山魚類批發市場
@@ -41,9 +42,18 @@ Score        : 88.75
 candidates   : 1
 ```
 
-➡️ High confidence, single candidate, wrong answer, and no second option to
-prompt doubt. See `tests/` — this is a permanent regression case, not a bug to
-be "fixed" away.
+The same Data Dictionary describes `Score` as **"For results ordering and
+reference only."** High score, single candidate, wrong building, and no
+second option to prompt doubt. That is a permanent regression case, not a
+bug to be "fixed" away by loosening the model.
+
+Pinned in:
+
+- `tests/golden_cases.yaml` → `wipha_t8_0020` (101 Wu Shan Road, Tuen Mun)
+- `tests/test_contracts.py` → `test_als_zero_candidates_*`,
+  `test_als_two_candidates_*`, `test_probe_als_shapes_are_the_three_required`
+  (village house / Long Ping Estate / nonexistent — the three `als_*` shapes
+  in `app/probe.py`)
 
 ### 1.3 "Typhoon shelter" is not a shelter for residents
 
@@ -57,16 +67,21 @@ of water. The card must never print the words "typhoon shelter" as advice.
 
 ---
 
-## 2. Architecture: three layers, one sentence each
+## 2. Architecture: three layers, plus an engine
 
 > **Wire is permissive and dumb. Adapter is strict and loud. Domain is total.**
+
+Three layers own the data. The engine is not a fourth layer: it is a
+**consumer of domain models only**.
 
 | Layer | File | Job | Forbidden |
 |---|---|---|---|
 | wire | `app/wire.py` | Mirror upstream JSON exactly. Keep `""`, keep stringified numbers. Every field optional unless the whole document is meaningless without it. | Unit conversion, `""`→`None`, `Literal[...]` over observed values |
 | adapter | `app/adapters.py` | The only wire→domain mapping. Decides what is missing and says so. | Business rules |
 | domain | `app/schemas.py` | Rule inputs and outputs. No field may silently mean "you are fine". | Upstream field names, `""` as missing, defaults that assume safety |
-| engine | `app/engine.py` | Whitelisted rules over domain models only | Reading raw dicts |
+
+`app/engine.py` runs whitelisted YAML rules over those domain models. It must
+not read raw dicts.
 
 ### The two rules that follow from this
 
@@ -170,14 +185,18 @@ and always carries `retrieved_on`.**
 `abstained=True` means **the whole card is unusable**: upstream was not JSON,
 the district is outside Hong Kong, or two sources contradict each other.
 
-Address-level uncertainty suppresses **blocks**:
+Uncertainty suppresses **blocks**, not the whole card. SHELTER is
+**district-level** once a warning in the activation set is in force
+(T8+ / landslip / red or black rain / very hot). HOUSING_RISK is
+**personal-scope**: withheld when housing was never asked (`NOT_STATED`),
+not because ALS was messy.
 
 ```python
 class Block(str, Enum):
     ACTIVE_WARNINGS   = "active_warnings"     # territory-wide
     LOCAL_OBSERVATION = "local_observation"   # district-level
-    SHELTER           = "shelter"             # address-level
-    HOUSING_RISK      = "housing_risk"        # address-level
+    SHELTER           = "shelter"             # district-level (warning set)
+    HOUSING_RISK      = "housing_risk"        # personal-scope
     WORK              = "work"
     CONTACT           = "contact"
 
@@ -187,15 +206,20 @@ class BlockOutcome(BaseModel):
     omitted_reason: str | None = None   # required when rendered is False
 ```
 
-For the 101 Wu Shan Road case this gives the right answer rather than a convenient one:
+For `101 Wu Shan Road` (`wipha_t8_0020`) this is the right answer:
 
 | Block | Outcome |
 |---|---|
 | ACTIVE_WARNINGS | ✅ rendered — territory-wide, address irrelevant |
 | LOCAL_OBSERVATION | ✅ rendered — the **district** (Tuen Mun) is correct |
-| SHELTER | 🔴 omitted — "we cannot confirm your address; this would have sent you to wrong locations" |
-| HOUSING_RISK | 🔴 omitted — same reason |
+| SHELTER | ✅ rendered — district-level; copy must not treat the ALS fish-market name as a shelter |
+| HOUSING_RISK | 🔴 withheld — `housing` was `NOT_STATED` (nobody asked), not an ALS failure |
 | CONTACT | ✅ rendered — address-independent |
+
+Same district with **2+ ALS candidates** still **renders** SHELTER
+(`test_als_two_candidates_*`). The example of SHELTER **omitted** is
+ALS returning zero candidates (`test_als_zero_candidates_*`), not 101
+Wu Shan Road.
 
 ➡️ A card that is 70% useful beats a blank card in a rainstorm.
 Suppress the blocks that are wrong, not the ones that happen to sit next to them.
@@ -370,17 +394,17 @@ For every rule with `provenance == quote_only`, assert `rule.source.quote` is
 a substring of a stored local snapshot of the source page.
 This is the only real defence against paraphrase drift (what `retrieved_on` is for).
 
-### 8.6 Golden cases still missing
+### 8.6 Golden cases
 
-- [ ] `warnsum {}` + non-empty `rhrread.warningMessage` → whole-card abstain
-- [ ] `actionCode: "CANCEL"` → must **not** count as active
-- [ ] ALS returns zero `SuggestedAddress` → SHELTER/HOUSING_RISK omitted
-- [ ] ALS returns 2+ candidates → ambiguous, blocks omitted with reason
-- [ ] `101 Wu Shan Road` → rain advice **rendered**, shelter block **omitted**
-- [ ] Very Hot Weather only → CONTACT says "until midnight"
-- [ ] T8 → CONTACT says round-the-clock
-- [ ] `housing=None` → card states it did not consider housing
-- [ ] Card copy contains the phrase "typhoon shelter" → fail
+- [x] `warnsum {}` + non-empty `rhrread.warningMessage` → whole-card abstain
+- [x] `actionCode: "CANCEL"` → must **not** count as active
+- [ ] ALS returns zero `SuggestedAddress` (`test_als_zero_candidates_*`) → the **named example** of SHELTER omitted (not 101 Wu Shan Road); HOUSING_RISK withheld as `NOT_STATED`
+- [x] ALS returns 2+ candidates in the same district (`test_als_two_candidates_*`) → SHELTER **rendered**
+- [x] `101 Wu Shan Road` / `wipha_t8_0020` → warning advice **rendered**, SHELTER **rendered**, HOUSING_RISK **withheld** (`NOT_STATED`)
+- [x] Very Hot Weather only → CONTACT says "until midnight"
+- [x] T8 → CONTACT says round-the-clock
+- [x] `housing=None` → card states it did not consider housing
+- [x] Card copy contains the phrase "typhoon shelter" → fail
 
 ### 8.7 Move coverage assertions out of the parametrised method
 
