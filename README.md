@@ -33,8 +33,7 @@ HAD's published heat-shelter list names **Wu Shan Road Community Hall** at
 replacement for Butterfly Bay Community Centre per the footnote on had.gov.hk).
 
 Fed to the Address Lookup Service with the **default** score tolerance
-`t` (range 0–80, default 35; ALS Data Dictionary v3.2, July 2024, §1.1.1),
-the lookup returns **one** candidate:
+`t` (range 0–80, default 35; ALS Data Dictionary v3.2, July 2024, §1.1.1), the lookup returns **one** candidate:
 
 ```
 BuildingName : CASTLE PEAK WHOLESALE FISH MARKET / 青山魚類批發市場
@@ -43,9 +42,8 @@ candidates   : 1
 ```
 
 The same Data Dictionary describes `Score` as **"For results ordering and
-reference only."** High score, single candidate, wrong building, and no
-second option to prompt doubt. That is a permanent regression case, not a
-bug to be "fixed" away by loosening the model.
+reference only."** High score, single candidate, wrong building, and no second option to prompt doubt.
+That is a permanent regression case, not a bug to be "fixed" away by loosening the model.
 
 Pinned in:
 
@@ -56,8 +54,8 @@ Pinned in:
   in `app/probe.py`)
 
 Sources: had.gov.hk emergency services; info.gov.hk GIA 29–30 Sep 2026;
-ALS Data Dictionary v3.2 (July 2024), Score = "For results ordering and
-reference only." A `b=1` probe is diagnostic only — no rule reads it (§5.1).
+ALS Data Dictionary v3.2 (July 2024), Score = "For results ordering and reference only." A `b=1` probe is diagnostic only 
+— no rule reads it (§5.1).
 
 ### 1.3 "Typhoon shelter" is not a shelter for residents
 
@@ -494,6 +492,7 @@ This is the only real defence against paraphrase drift (what `retrieved_on` is f
 - [x] `warnsum {}` + non-empty `rhrread.warningMessage` → whole-card abstain
 - [x] `actionCode: "CANCEL"` → must **not** count as active
 - [ ] ALS returns zero `SuggestedAddress` (`als_zero_candidates` / `test_als_zero_candidates_*`) → the **named example** of SHELTER omitted (not 101 Wu Shan Road); HOUSING_RISK withheld as `NOT_STATED`
+- [ ] `als_multi_district` — `Castle Peak Road`, no number → same two blocks omitted `ADDRESS_MULTI_DISTRICT`
 - [x] ALS returns 2+ candidates in the **same** district (`test_als_two_candidates_*`) → SHELTER **rendered**
 - [x] `101 Wu Shan Road` / `wipha_t8_0020` → warning advice **rendered**, SHELTER **rendered**, HOUSING_RISK **withheld** (`NOT_STATED`)
 - [x] Very Hot Weather only → CONTACT says "until midnight" (`vhww_fdh_central_1400` if present)
