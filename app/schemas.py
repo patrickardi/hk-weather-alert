@@ -10,6 +10,20 @@ BANNED_PHRASES = frozenset({"typhoon shelter", "Typhoon shelter", "避风塘"})
 SHELTER_OMIT_REASON = "本卡不显示庇护所位置，请致电 1823"
 
 
+class AddressResolution(BaseModel):
+    district: str | None                     # 规则唯一允许读的字段
+    omit_reason: OmitReason | None = None    # district 为 None 时必填
+    geocode_candidate_count: int             # 以下三个是诊断，engine 不读
+    geocode_candidate_count_strict: int | None = None
+    top_building_name: str | None = None
+
+    @model_validator(mode="after")
+    def _district_xor_reason(self) -> "AddressResolution":
+        if (self.district is None) == (self.omit_reason is None):
+            raise ValueError("district / omit_reason: exactly one must be set")
+        return self
+
+
 class Severity(str, Enum):
     ADVISORY = "advisory"
     CAUTION = "caution"
@@ -230,16 +244,22 @@ class RiskResponse(BaseModel):
     language: str = "zh"
     needs_large_type: bool = False
 
+    abstained: bool
+    abstain_reason: str | None = None
+    advice: list[AdviceItem]
+    blocks: list[BlockOutcome] = []
+
     @model_validator(mode="after")
-    def _abstain_contract(self):
+    def _contract(self) -> "RiskResponse":
         if self.abstained:
-            if not self.abstain_reason:
-                raise ValueError("弃答必须有理由")
-            codes = {item.code for item in self.advice}
-            if not codes.intersection(FALLBACK_CODES):
-                raise ValueError("弃答必须含 fallback 热线")
-        elif self.abstain_reason is not None:
-            raise ValueError("未弃答不应有 abstain_reason")
+            if not {a.code for a in self.advice} & FALLBACK_CODES:
+                raise ValueError("abstained without fallback advice")
+            return self
+        if self.abstain_reason is not None:
+            raise ValueError("not abstained but carries abstain_reason")
+        seen = [b.block for b in self.blocks]
+        if len(seen) != len(Block) or set(seen) != set(Block):
+            raise ValueError("every Block needs exactly one outcome")
         return self
 
 
