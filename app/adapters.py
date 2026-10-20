@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from pydantic import ValidationError
-
 from app.engine import abstain_incomplete, abstain_sources_disagree, evaluate
 from app.schemas import (
     ActiveWarning,
@@ -44,6 +42,23 @@ def sources_disagree(warnsum: WarnsumDocument, rhrread: RhrreadDocument) -> bool
     raw = rhrread.warningMessage
     messages_empty = raw == "" or raw == []
     return warnsum_empty != messages_empty
+
+
+def resolve_address(als: AlsResponse, typed_district: str | None) -> AddressResolution:
+    cands = als.SuggestedAddress                       # wire 里默认 []
+    districts = {d for c in cands if (d := _dc_district(c))}   # 走 ...EngDistrict.DcDistrict，缺一层返 None
+    diag = dict(
+        geocode_candidate_count=len(cands),
+        top_building_name=_building_name(cands[0]) if cands else None,
+    )
+    if not districts:
+        return AddressResolution(district=None, omit_reason=OmitReason.ADDRESS_NOT_FOUND, **diag)
+    if len(districts) >= 2:
+        return AddressResolution(district=None, omit_reason=OmitReason.ADDRESS_MULTI_DISTRICT, **diag)
+    (district,) = districts
+    if typed_district and _norm(typed_district) != _norm(district):
+        return AddressResolution(district=None, omit_reason=OmitReason.ADDRESS_DISTRICT_CONFLICT, **diag)
+    return AddressResolution(district=district, **diag)
 
 
 def to_weather(warnsum: WarnsumDocument, rhrread: RhrreadDocument) -> WeatherState:
